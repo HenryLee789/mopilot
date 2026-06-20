@@ -44,20 +44,21 @@ struct CleanView: View {
     }
 
     private func cleanScanPanel(moPath: String) -> some View {
-        HStack(spacing: 28) {
+        HStack(spacing: 26) {
             SmartScannerOrb(
                 systemImage: runner.isRunning ? "magnifyingglass" : runner.hasSuccessfulRun(.cleanDryRun) ? "checkmark.shield" : "sparkles",
-                title: runner.isRunning ? "Scanning" : runner.hasSuccessfulRun(.cleanDryRun) ? "Preview" : "Clean",
-                subtitle: runner.isRunning ? "dry-run" : runner.hasSuccessfulRun(.cleanDryRun) ? "ready" : "safe scan",
+                title: runner.isRunning ? "扫描中" : runner.hasSuccessfulRun(.cleanDryRun) ? "已预览" : "清理",
+                subtitle: runner.isRunning ? "dry-run" : runner.hasSuccessfulRun(.cleanDryRun) ? "可确认" : "安全扫描",
                 isActive: runner.isRunning || !runner.hasSuccessfulRun(.cleanDryRun)
             )
-            .frame(width: 220, height: 220)
+            .frame(width: 198, height: 198)
 
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 15) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(runner.hasSuccessfulRun(.cleanDryRun) ? "预览已完成" : "安全清理扫描")
-                        .font(.title.weight(.bold))
+                        .font(.title2.weight(.bold))
                     Text(runner.hasSuccessfulRun(.cleanDryRun) ? "你可以查看日志确认范围，再执行真实清理。" : "先运行 dry-run，只预览、不删除。")
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
 
@@ -88,14 +89,14 @@ struct CleanView: View {
                 }
             }
         }
-        .padding(24)
+        .padding(22)
         .background(.regularMaterial)
         .background(
             LinearGradient(
                 colors: [
-                    MoPilotPalette.mint.opacity(0.18),
-                    MoPilotPalette.teal.opacity(0.12),
-                    MoPilotPalette.blue.opacity(0.10)
+                    MoPilotPalette.mint.opacity(0.14),
+                    MoPilotPalette.teal.opacity(0.10),
+                    MoPilotPalette.blue.opacity(0.075)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -120,7 +121,7 @@ struct CleanView: View {
                 .foregroundStyle(.secondary)
         }
         .padding(12)
-        .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 96, alignment: .leading)
         .background(.thinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }

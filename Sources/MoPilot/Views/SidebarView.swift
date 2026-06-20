@@ -5,10 +5,10 @@ struct SidebarView: View {
     let cliInstalled: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 16) {
             brandHeader
 
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 12) {
                 sidebarGroup("智能维护", sections: [.dashboard])
                 sidebarGroup("清理", sections: [.clean, .analyze])
                 sidebarGroup("应用", sections: [.uninstall])
@@ -31,8 +31,9 @@ struct SidebarView: View {
             .background(.thinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
-        .padding(18)
-        .frame(width: 258)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 18)
+        .frame(width: 240)
         .background(
             LinearGradient(
                 colors: [
@@ -57,17 +58,17 @@ struct SidebarView: View {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .fill(MoPilotPalette.smartGradient)
                 Image(systemName: "sparkles")
-                    .font(.title3.weight(.bold))
+                    .font(.headline.weight(.bold))
                     .foregroundStyle(.white)
             }
-            .frame(width: 44, height: 44)
-            .shadow(color: MoPilotPalette.blue.opacity(0.2), radius: 10, y: 6)
+            .frame(width: 38, height: 38)
+            .shadow(color: MoPilotPalette.blue.opacity(0.16), radius: 8, y: 5)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("MoPilot")
-                    .font(.title3.weight(.bold))
-                Text("Smart CLI Care")
-                    .font(.caption)
+                    .font(.headline.weight(.bold))
+                Text("mo GUI Wrapper")
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
             }
         }
@@ -98,20 +99,15 @@ struct SidebarView: View {
                     .frame(width: 20)
                     .foregroundStyle(selection == section ? .white : sectionAccent(section))
 
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(section.shortTitle)
-                        .font(.callout.weight(.semibold))
-                    Text(section.sidebarSubtitle)
-                        .font(.caption2)
-                        .foregroundStyle(selection == section ? .white.opacity(0.72) : .secondary)
-                        .lineLimit(1)
-                }
+                Text(section.shortTitle)
+                    .font(.callout.weight(.semibold))
+                    .lineLimit(1)
 
                 Spacer()
             }
             .padding(.horizontal, 10)
-            .padding(.vertical, 9)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
             .background {
                 if selection == section {
                     RoundedRectangle(cornerRadius: 8, style: .continuous)

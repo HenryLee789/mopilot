@@ -20,10 +20,10 @@ enum MoPilotPalette {
     static var smartGradient: LinearGradient {
         LinearGradient(
             colors: [
-                violet.opacity(0.96),
-                blue.opacity(0.92),
-                teal.opacity(0.92),
-                mint.opacity(0.92)
+                violet.opacity(0.88),
+                blue.opacity(0.88),
+                teal.opacity(0.86),
+                mint.opacity(0.82)
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -70,18 +70,18 @@ struct MoPilotBackground: View {
             LinearGradient(
                 colors: [
                     Color(nsColor: .windowBackgroundColor),
-                    MoPilotPalette.violet.opacity(0.09),
-                    MoPilotPalette.mint.opacity(0.08),
-                    MoPilotPalette.blue.opacity(0.055),
-                    MoPilotPalette.magenta.opacity(0.045),
-                    MoPilotPalette.amber.opacity(0.03)
+                    MoPilotPalette.violet.opacity(0.055),
+                    MoPilotPalette.mint.opacity(0.055),
+                    MoPilotPalette.blue.opacity(0.04),
+                    MoPilotPalette.magenta.opacity(0.028),
+                    MoPilotPalette.amber.opacity(0.02)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
 
             ScanLineField()
-                .opacity(0.45)
+                .opacity(0.24)
         }
     }
 }
@@ -130,12 +130,12 @@ struct PageHeader: View {
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
             AnimatedScanRing(systemImage: systemImage, isActive: true)
-                .frame(width: 72, height: 72)
+                .frame(width: 60, height: 60)
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 10) {
                     Text(title)
-                        .font(.largeTitle.weight(.bold))
+                        .font(.title.weight(.bold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
 
@@ -148,7 +148,7 @@ struct PageHeader: View {
                 }
 
                 Text(subtitle)
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -217,11 +217,11 @@ struct SmartScannerOrb: View {
             ZStack {
                 Circle()
                     .fill(MoPilotPalette.smartGradient)
-                    .shadow(color: MoPilotPalette.blue.opacity(0.28), radius: 28, x: 0, y: 18)
-                    .shadow(color: MoPilotPalette.mint.opacity(0.18), radius: 18, x: -8, y: -8)
+                    .shadow(color: MoPilotPalette.blue.opacity(0.20), radius: 22, x: 0, y: 14)
+                    .shadow(color: MoPilotPalette.mint.opacity(0.12), radius: 14, x: -6, y: -6)
 
                 Circle()
-                    .stroke(Color.white.opacity(0.16), lineWidth: 22)
+                    .stroke(Color.white.opacity(0.12), lineWidth: 14)
                     .padding(18)
 
                 Circle()
@@ -232,9 +232,9 @@ struct SmartScannerOrb: View {
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
                     )
-                    .padding(11)
+                    .padding(12)
                     .rotationEffect(rotation)
 
                 Circle()
@@ -245,9 +245,9 @@ struct SmartScannerOrb: View {
                             startPoint: .leading,
                             endPoint: .trailing
                         ),
-                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 4, lineCap: .round)
                     )
-                    .padding(28)
+                    .padding(30)
                     .rotationEffect(counterRotation)
 
                 RadialGradient(
@@ -261,11 +261,11 @@ struct SmartScannerOrb: View {
 
                 VStack(spacing: 8) {
                     Image(systemName: systemImage)
-                        .font(.system(size: 42, weight: .semibold))
+                        .font(.system(size: 34, weight: .semibold))
                         .foregroundStyle(.white)
                         .symbolRenderingMode(.hierarchical)
                     Text(title)
-                        .font(.title2.weight(.bold))
+                        .font(.title3.weight(.bold))
                         .foregroundStyle(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -319,7 +319,7 @@ struct SmartModuleTile: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(14)
-            .frame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 70, alignment: .leading)
             .background(.regularMaterial)
             .background(accent.opacity(isHovered ? 0.12 : 0.055))
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -350,9 +350,9 @@ struct SmartActionButton: View {
             Label(title, systemImage: systemImage)
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
-                .frame(minWidth: 168)
+                .padding(.horizontal, 22)
+                .padding(.vertical, 11)
+                .frame(minWidth: 152)
                 .background(
                     LinearGradient(
                         colors: role == .destructive

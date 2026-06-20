@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.4.1
+
+- Tuned the Smart Care visual details: calmer scanner orb, lighter animated background, and more restrained gradients.
+- Reduced title, card, and button sizing for a more polished desktop-tool feel.
+- Simplified the custom sidebar by removing noisy secondary row text and tightening navigation spacing.
+- Refined Dashboard and Clean layout density while preserving the scan-first workflow.
+- Updated app bundle metadata to version `0.4.1`.
+
 ## v0.4.0
 
 - Replaced the native sidebar with a custom grouped maintenance-tool sidebar.

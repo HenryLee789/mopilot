@@ -9,9 +9,9 @@ struct DashboardView: View {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("Smart Care")
-                        .font(.system(size: 42, weight: .bold))
+                        .font(.system(size: 36, weight: .bold))
                     Text("非官方 GUI Wrapper，只调用本机 Mole CLI。")
-                        .font(.callout)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
 
@@ -27,21 +27,22 @@ struct DashboardView: View {
     }
 
     private var smartCarePanel: some View {
-        HStack(spacing: 30) {
+        HStack(spacing: 28) {
             SmartScannerOrb(
                 systemImage: appState.cliStatus.isInstalled ? "checkmark.shield" : "exclamationmark.triangle",
-                title: appState.cliStatus.isInstalled ? "Ready" : "Missing",
-                subtitle: appState.cliStatus.isInstalled ? "mo connected" : "install mo",
+                title: appState.cliStatus.isInstalled ? "就绪" : "缺少 CLI",
+                subtitle: appState.cliStatus.isInstalled ? "mo 已连接" : "brew install mole",
                 isActive: appState.cliStatus.isInstalled
             )
-            .frame(width: 250, height: 250)
+            .frame(width: 220, height: 220)
 
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 7) {
                     Text(appState.cliStatus.isInstalled ? "准备好进行一次安全扫描" : "未检测到 Mole CLI")
-                        .font(.title.weight(.bold))
+                        .font(.title2.weight(.bold))
                         .lineLimit(2)
                     Text(appState.cliStatus.isInstalled ? "先预览缓存清理、磁盘占用和系统状态。真实清理、优化、卸载都保留确认步骤。" : "安装 Mole CLI 后，MoPilot 才能开始扫描和预览。")
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -76,15 +77,15 @@ struct DashboardView: View {
                 }
             }
         }
-        .padding(24)
+        .padding(22)
         .background(.regularMaterial)
         .background(
             LinearGradient(
                 colors: [
-                    MoPilotPalette.violet.opacity(0.22),
-                    MoPilotPalette.blue.opacity(0.16),
-                    MoPilotPalette.teal.opacity(0.14),
-                    MoPilotPalette.magenta.opacity(0.08)
+                    MoPilotPalette.violet.opacity(0.16),
+                    MoPilotPalette.blue.opacity(0.13),
+                    MoPilotPalette.teal.opacity(0.11),
+                    MoPilotPalette.magenta.opacity(0.055)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -95,7 +96,7 @@ struct DashboardView: View {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .stroke(.white.opacity(0.18), lineWidth: 1)
         }
-        .shadow(color: MoPilotPalette.blue.opacity(0.18), radius: 24, x: 0, y: 16)
+        .shadow(color: MoPilotPalette.blue.opacity(0.12), radius: 20, x: 0, y: 12)
     }
 
     private var summaryGrid: some View {
@@ -119,7 +120,7 @@ struct DashboardView: View {
 
     private var statusPill: some View {
         Label(appState.cliStatus.isInstalled ? "Mole CLI 已就绪" : "需要安装 mo", systemImage: appState.cliStatus.isInstalled ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-            .font(.callout.weight(.semibold))
+            .font(.subheadline.weight(.semibold))
             .foregroundStyle(appState.cliStatus.isInstalled ? MoPilotPalette.mint : MoPilotPalette.amber)
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
@@ -174,13 +175,14 @@ struct DashboardView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text(value)
-                    .font(.callout.weight(.semibold))
+                    .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
             }
             Spacer()
         }
         .padding(10)
+        .frame(minHeight: 58)
         .background(.thinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
