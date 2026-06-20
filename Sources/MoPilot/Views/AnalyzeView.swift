@@ -17,10 +17,11 @@ struct AnalyzeView: View {
         CommandPageLayout(
             title: "Analyze 磁盘分析",
             subtitle: "优先使用 JSON 输出构建列表；当前 CLI 不支持或解析失败时自动回退原始日志。",
+            systemImage: "chart.pie",
             runner: runner
         ) {
             if let moPath = appState.cliStatus.path {
-                VStack(alignment: .leading, spacing: 12) {
+                ProductCard(title: "分析控制台", systemImage: "chart.pie") {
                     Text(appState.capabilities.analyzeModeDescription)
                         .font(.callout)
                         .foregroundStyle(.secondary)
@@ -40,16 +41,18 @@ struct AnalyzeView: View {
                 }
 
                 if !parsedItems.isEmpty {
-                    Table(parsedItems) {
-                        TableColumn("名称", value: \.name)
-                            .width(min: 120, ideal: 180, max: 260)
-                        TableColumn("大小", value: \.size)
-                            .width(min: 90, ideal: 120, max: 160)
-                        TableColumn("类型", value: \.kind)
-                            .width(min: 60, ideal: 80, max: 100)
-                        TableColumn("路径", value: \.path)
+                    ProductCard(title: "分析结果", systemImage: "list.bullet.rectangle") {
+                        Table(parsedItems) {
+                            TableColumn("名称", value: \.name)
+                                .width(min: 120, ideal: 180, max: 260)
+                            TableColumn("大小", value: \.size)
+                                .width(min: 90, ideal: 120, max: 160)
+                            TableColumn("类型", value: \.kind)
+                                .width(min: 60, ideal: 80, max: 100)
+                            TableColumn("路径", value: \.path)
+                        }
+                        .frame(minHeight: 180, maxHeight: 260)
                     }
-                    .frame(minHeight: 160, maxHeight: 240)
                 }
             } else {
                 CLIUnavailableView(message: missingMessage)

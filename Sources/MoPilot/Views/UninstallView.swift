@@ -20,6 +20,7 @@ struct UninstallView: View {
         CommandPageLayout(
             title: "Uninstall 应用卸载",
             subtitle: "在图形界面中选择应用，先 dry-run 预览，再确认后台调用 mo uninstall 完成卸载。默认移入废纸篓，不使用永久删除。",
+            systemImage: "trash",
             runner: runner
         ) {
             VStack(alignment: .leading, spacing: 14) {
@@ -85,45 +86,47 @@ struct UninstallView: View {
     }
 
     private func toolbar(moPath: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                TextField("搜索应用、Bundle ID 或路径", text: $searchText)
-                    .textFieldStyle(.roundedBorder)
+        ProductCard(title: "卸载控制台", systemImage: "app.badge") {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    TextField("搜索应用、Bundle ID 或路径", text: $searchText)
+                        .textFieldStyle(.roundedBorder)
 
-                Button {
-                    Task { await refreshApps(moPath: moPath) }
-                } label: {
-                    Label("刷新列表", systemImage: "arrow.clockwise")
+                    Button {
+                        Task { await refreshApps(moPath: moPath) }
+                    } label: {
+                        Label("刷新列表", systemImage: "arrow.clockwise")
+                    }
+                    .disabled(isLoadingApps || runner.isRunning)
                 }
-                .disabled(isLoadingApps || runner.isRunning)
-            }
 
-            HStack {
-                Button {
-                    runPreview(moPath: moPath)
-                } label: {
-                    Label("预览选中应用", systemImage: "doc.text.magnifyingglass")
+                HStack {
+                    Button {
+                        runPreview(moPath: moPath)
+                    } label: {
+                        Label("预览选中应用", systemImage: "doc.text.magnifyingglass")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(selectedNames.isEmpty || runner.isRunning)
+
+                    Button {
+                        showUninstallConfirmation = true
+                    } label: {
+                        Label("卸载选中应用", systemImage: "trash")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                    .disabled(!canUninstallSelected || runner.isRunning)
+
+                    RunnerCancelButton(runner: runner)
+                    CopyLogButton(text: runner.logText)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(selectedNames.isEmpty || runner.isRunning)
 
-                Button {
-                    showUninstallConfirmation = true
-                } label: {
-                    Label("卸载选中应用", systemImage: "trash")
+                if !listMessage.isEmpty {
+                    Text(listMessage)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
-                .disabled(!canUninstallSelected || runner.isRunning)
-
-                RunnerCancelButton(runner: runner)
-                CopyLogButton(text: runner.logText)
-            }
-
-            if !listMessage.isEmpty {
-                Text(listMessage)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -266,13 +269,19 @@ private struct UninstallAppRow: View {
     let duplicateCount: Int
     let isSelfApp: Bool
     let toggle: () -> Void
+    @State private var isHovered = false
 
     var body: some View {
         Button(action: toggle) {
             HStack(spacing: 12) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isSelected ? .teal : .secondary)
-                    .font(.title3)
+                ZStack {
+                    Circle()
+                        .fill(isSelected ? MoPilotPalette.mint.opacity(0.18) : Color.secondary.opacity(0.08))
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(isSelected ? MoPilotPalette.teal : .secondary)
+                        .font(.title3)
+                }
+                .frame(width: 34, height: 34)
 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
@@ -305,17 +314,46 @@ private struct UninstallAppRow: View {
 
                 Spacer()
             }
-            .padding(10)
-            .background(isSelected ? Color.teal.opacity(0.12) : Color.clear)
+            .padding(12)
+            .background(
+                LinearGradient(
+                    colors: rowBackgroundColors,
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(isSelected ? Color.teal.opacity(0.45) : Color.secondary.opacity(0.12), lineWidth: 1)
+                    .stroke(rowStrokeColor, lineWidth: 1)
             }
         }
         .buttonStyle(.plain)
         .disabled(isSelfApp)
         .opacity(isSelfApp ? 0.55 : 1)
+        .onHover { isHovered = $0 }
+        .animation(.easeOut(duration: 0.16), value: isHovered)
+        .animation(.easeOut(duration: 0.16), value: isSelected)
+    }
+
+    private var rowBackgroundColors: [Color] {
+        if isSelected {
+            return [MoPilotPalette.mint.opacity(0.18), MoPilotPalette.blue.opacity(0.10)]
+        }
+        if isHovered {
+            return [Color.white.opacity(0.10), MoPilotPalette.teal.opacity(0.06)]
+        }
+        return [Color.clear, Color.clear]
+    }
+
+    private var rowStrokeColor: Color {
+        if isSelected {
+            return MoPilotPalette.teal.opacity(0.45)
+        }
+        if isHovered {
+            return MoPilotPalette.teal.opacity(0.22)
+        }
+        return Color.secondary.opacity(0.12)
     }
 }
 

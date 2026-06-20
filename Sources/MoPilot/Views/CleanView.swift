@@ -10,29 +10,35 @@ struct CleanView: View {
         CommandPageLayout(
             title: "Clean 清理缓存",
             subtitle: "默认先运行 mo clean --dry-run。确认看过预览后，才允许执行 mo clean。",
+            systemImage: "sparkles",
             runner: runner
         ) {
             if let moPath = appState.cliStatus.path {
-                HStack {
-                    Button {
-                        didAutoPreview = true
-                        runner.run(.cleanDryRun, moPath: moPath)
-                    } label: {
-                        Label("重新预览", systemImage: "doc.text.magnifyingglass")
-                    }
-                    .disabled(runner.isRunning)
+                ProductCard(title: "清理预览", systemImage: "sparkles") {
+                    Text("MoPilot 会先调用 mo clean --dry-run，把将要清理的内容显示出来。确认无误后，真实清理按钮才会启用。")
+                        .foregroundStyle(.secondary)
 
-                    Button {
-                        showCleanConfirmation = true
-                    } label: {
-                        Label("执行清理", systemImage: "trash")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.red)
-                    .disabled(runner.isRunning || !runner.hasSuccessfulRun(.cleanDryRun))
+                    HStack {
+                        Button {
+                            didAutoPreview = true
+                            runner.run(.cleanDryRun, moPath: moPath)
+                        } label: {
+                            Label("重新预览", systemImage: "doc.text.magnifyingglass")
+                        }
+                        .disabled(runner.isRunning)
 
-                    RunnerCancelButton(runner: runner)
-                    CopyLogButton(text: runner.logText)
+                        Button {
+                            showCleanConfirmation = true
+                        } label: {
+                            Label("执行清理", systemImage: "trash")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.red)
+                        .disabled(runner.isRunning || !runner.hasSuccessfulRun(.cleanDryRun))
+
+                        RunnerCancelButton(runner: runner)
+                        CopyLogButton(text: runner.logText)
+                    }
                 }
             } else {
                 CLIUnavailableView(message: missingMessage)

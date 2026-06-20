@@ -14,10 +14,11 @@ struct StatusView: View {
         CommandPageLayout(
             title: "Status 系统状态",
             subtitle: "优先使用 JSON 输出构建状态卡片；当前 CLI 不支持或解析失败时自动回退原始日志。",
+            systemImage: "waveform.path.ecg",
             runner: runner
         ) {
             if let moPath = appState.cliStatus.path {
-                VStack(alignment: .leading, spacing: 12) {
+                ProductCard(title: "状态控制台", systemImage: "waveform.path.ecg") {
                     Text(appState.capabilities.statusModeDescription)
                         .font(.callout)
                         .foregroundStyle(.secondary)
@@ -44,9 +45,7 @@ struct StatusView: View {
                     }
 
                     if !parsedStatus.processes.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("高占用进程")
-                                .font(.headline)
+                        ProductCard(title: "高占用进程", systemImage: "cpu") {
                             Table(parsedStatus.processes) {
                                 TableColumn("进程", value: \.name)
                                 TableColumn("CPU", value: \.cpu)

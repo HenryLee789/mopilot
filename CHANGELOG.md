@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.0
+
+- Added a richer MoPilot visual system with animated scan rings, soft glass panels, and subtle motion backgrounds.
+- Reworked Dashboard into a maintenance cockpit with a live readiness panel, disk meter, and stronger tool tiles.
+- Restyled command pages with product panels, an animated command status strip, and a polished console log area.
+- Refined Uninstall selection rows with hover and selected states while preserving the dry-run-first workflow.
+- Updated app bundle metadata to version `0.3.0`.
+
 ## v0.2.0
 
 - Rebuilt Uninstall as a full GUI workflow.

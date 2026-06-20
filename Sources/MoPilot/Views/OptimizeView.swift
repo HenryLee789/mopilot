@@ -9,9 +9,10 @@ struct OptimizeView: View {
         CommandPageLayout(
             title: "Optimize 系统优化",
             subtitle: "默认先运行 mo optimize --dry-run。执行优化前必须再次确认。",
+            systemImage: "slider.horizontal.3",
             runner: runner
         ) {
-            VStack(alignment: .leading, spacing: 12) {
+            ProductCard(title: "优化预览", systemImage: "slider.horizontal.3") {
                 Text("系统优化可能影响系统设置或服务行为。请先查看 dry-run 输出，再决定是否执行。")
                     .foregroundStyle(.secondary)
 
