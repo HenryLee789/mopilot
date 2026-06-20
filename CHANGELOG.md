@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.4.2
+
+- Updated DMG packaging so the mounted installer shows `MoPilot.app` and an `Applications` shortcut side by side.
+- Users can now drag `MoPilot.app` directly onto the `Applications` shortcut after opening the DMG.
+- Updated app bundle metadata to version `0.4.2`.
+
 ## v0.4.1
 
 - Tuned the Smart Care visual details: calmer scanner orb, lighter animated background, and more restrained gradients.

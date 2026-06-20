@@ -9,7 +9,7 @@ fi
 APP_DISPLAY_NAME="MoPilot"
 EXECUTABLE_NAME="MoPilot"
 BUNDLE_ID="io.github.mopilot.app"
-APP_VERSION="0.4.1"
+APP_VERSION="0.4.2"
 MIN_SYSTEM_VERSION="13.0"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

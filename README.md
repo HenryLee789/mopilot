@@ -65,6 +65,8 @@ The DMG is created at:
 dist/MoPilot.dmg
 ```
 
+After opening the DMG, drag `MoPilot.app` onto the `Applications` shortcut in the same window to install it.
+
 ## Run
 
 From this repository:
