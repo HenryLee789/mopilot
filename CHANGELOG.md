@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.4.0
+
+- Replaced the native sidebar with a custom grouped maintenance-tool sidebar.
+- Rebuilt Dashboard around a Smart Care style scanner panel with a large animated orb, status modules, and a primary scan action.
+- Reworked Clean into a scan-first screen with an animated dry-run orb and preview category tiles.
+- Added reusable smart scanner, module tile, and gradient action components.
+- Updated app bundle metadata to version `0.4.0`.
+
 ## v0.3.0
 
 - Added a richer MoPilot visual system with animated scan rings, soft glass panels, and subtle motion backgrounds.

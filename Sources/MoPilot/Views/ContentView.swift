@@ -2,33 +2,29 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var appState: MoleAppState
-    @State private var selection: AppSection? = .dashboard
+    @State private var selection: AppSection = .dashboard
 
     var body: some View {
-        NavigationSplitView {
-            List(AppSection.allCases, selection: $selection) { section in
-                Label(section.title, systemImage: section.systemImage)
-                    .tag(section)
-            }
-            .listStyle(.sidebar)
-            .navigationTitle("MoPilot")
-        } detail: {
+        HStack(spacing: 0) {
+            SidebarView(selection: $selection, cliInstalled: appState.cliStatus.isInstalled)
+
             detailView
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .task {
-                    await appState.refresh()
-                }
-                .toolbar {
-                    ToolbarItem(placement: .automatic) {
-                        if appState.isRefreshing {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Button {
-                                Task { await appState.refresh() }
-                            } label: {
-                                Label("重新检测", systemImage: "arrow.clockwise")
-                            }
+        }
+        .background(MoPilotBackground().ignoresSafeArea())
+        .task {
+            await appState.refresh()
+        }
+        .toolbar {
+            ToolbarItem(placement: .automatic) {
+                if appState.isRefreshing {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Button {
+                        Task { await appState.refresh() }
+                    } label: {
+                        Label("重新检测", systemImage: "arrow.clockwise")
                         }
                     }
                 }
@@ -37,12 +33,9 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detailView: some View {
-        switch selection ?? .dashboard {
+        switch selection {
         case .dashboard:
-            DashboardView(selection: Binding(
-                get: { selection ?? .dashboard },
-                set: { selection = $0 }
-            ))
+            DashboardView(selection: $selection)
         case .clean:
             CleanView()
         case .analyze:

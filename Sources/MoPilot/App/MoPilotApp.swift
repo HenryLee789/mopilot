@@ -10,7 +10,7 @@ struct MoPilotApp: App {
         WindowGroup("MoPilot") {
             ContentView()
                 .environmentObject(appState)
-                .frame(minWidth: 1120, minHeight: 740)
+                .frame(minWidth: 1280, minHeight: 800)
         }
         .commands {
             CommandGroup(replacing: .newItem) {}

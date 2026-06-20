@@ -4,12 +4,27 @@ enum MoPilotPalette {
     static let mint = Color(red: 0.15, green: 0.78, blue: 0.55)
     static let teal = Color(red: 0.02, green: 0.66, blue: 0.78)
     static let blue = Color(red: 0.18, green: 0.46, blue: 0.95)
+    static let violet = Color(red: 0.46, green: 0.34, blue: 0.96)
+    static let magenta = Color(red: 0.86, green: 0.22, blue: 0.78)
     static let amber = Color(red: 0.96, green: 0.58, blue: 0.20)
     static let rose = Color(red: 0.92, green: 0.22, blue: 0.34)
 
     static var heroGradient: LinearGradient {
         LinearGradient(
-            colors: [mint, teal, blue.opacity(0.92)],
+            colors: [mint, teal, blue.opacity(0.92), violet.opacity(0.86)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    static var smartGradient: LinearGradient {
+        LinearGradient(
+            colors: [
+                violet.opacity(0.96),
+                blue.opacity(0.92),
+                teal.opacity(0.92),
+                mint.opacity(0.92)
+            ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -41,7 +56,8 @@ struct MoPilotPage<Content: View>: View {
                 VStack(alignment: .leading, spacing: 18) {
                     content
                 }
-                .padding(24)
+                .padding(.horizontal, 28)
+                .padding(.vertical, 24)
                 .frame(maxWidth: maxWidth, alignment: .leading)
             }
         }
@@ -54,9 +70,11 @@ struct MoPilotBackground: View {
             LinearGradient(
                 colors: [
                     Color(nsColor: .windowBackgroundColor),
+                    MoPilotPalette.violet.opacity(0.09),
                     MoPilotPalette.mint.opacity(0.08),
                     MoPilotPalette.blue.opacity(0.055),
-                    MoPilotPalette.amber.opacity(0.035)
+                    MoPilotPalette.magenta.opacity(0.045),
+                    MoPilotPalette.amber.opacity(0.03)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -179,6 +197,178 @@ struct AnimatedScanRing: View {
                     .symbolRenderingMode(.hierarchical)
             }
         }
+    }
+}
+
+struct SmartScannerOrb: View {
+    let systemImage: String
+    let title: String
+    let subtitle: String
+    var isActive: Bool = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        TimelineView(.animation) { timeline in
+            let seconds = reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
+            let rotation = Angle.degrees(isActive ? seconds * 42 : 0)
+            let counterRotation = Angle.degrees(isActive ? -seconds * 24 : 0)
+            let pulse = isActive && !reduceMotion ? 0.94 + 0.04 * sin(seconds * 2.2) : 1
+
+            ZStack {
+                Circle()
+                    .fill(MoPilotPalette.smartGradient)
+                    .shadow(color: MoPilotPalette.blue.opacity(0.28), radius: 28, x: 0, y: 18)
+                    .shadow(color: MoPilotPalette.mint.opacity(0.18), radius: 18, x: -8, y: -8)
+
+                Circle()
+                    .stroke(Color.white.opacity(0.16), lineWidth: 22)
+                    .padding(18)
+
+                Circle()
+                    .trim(from: 0.02, to: 0.28)
+                    .stroke(
+                        LinearGradient(
+                            colors: [.white.opacity(0.08), .white.opacity(0.92), MoPilotPalette.mint],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                    )
+                    .padding(11)
+                    .rotationEffect(rotation)
+
+                Circle()
+                    .trim(from: 0.56, to: 0.78)
+                    .stroke(
+                        LinearGradient(
+                            colors: [MoPilotPalette.magenta.opacity(0.15), .white.opacity(0.78)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
+                    )
+                    .padding(28)
+                    .rotationEffect(counterRotation)
+
+                RadialGradient(
+                    colors: [.white.opacity(0.24), .clear],
+                    center: .topLeading,
+                    startRadius: 4,
+                    endRadius: 160
+                )
+                .clipShape(Circle())
+                .padding(8)
+
+                VStack(spacing: 8) {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 42, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .symbolRenderingMode(.hierarchical)
+                    Text(title)
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Text(subtitle)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.78))
+                        .lineLimit(1)
+                }
+                .padding(.horizontal, 24)
+            }
+            .scaleEffect(pulse)
+        }
+        .aspectRatio(1, contentMode: .fit)
+    }
+}
+
+struct SmartModuleTile: View {
+    let title: String
+    let subtitle: String
+    let systemImage: String
+    let accent: Color
+    var isEnabled: Bool = true
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(accent.opacity(isHovered ? 0.24 : 0.16))
+                    Image(systemName: systemImage)
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(accent)
+                }
+                .frame(width: 44, height: 44)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.headline)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
+            .background(.regularMaterial)
+            .background(accent.opacity(isHovered ? 0.12 : 0.055))
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(accent.opacity(isHovered ? 0.36 : 0.16), lineWidth: 1)
+            }
+            .shadow(color: accent.opacity(isHovered ? 0.16 : 0.06), radius: isHovered ? 16 : 8, x: 0, y: 8)
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+        .opacity(isEnabled ? 1 : 0.45)
+        .scaleEffect(isHovered && isEnabled ? 1.012 : 1)
+        .animation(.easeOut(duration: 0.16), value: isHovered)
+        .onHover { isHovered = $0 }
+    }
+}
+
+struct SmartActionButton: View {
+    let title: String
+    let systemImage: String
+    var role: ButtonRole?
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(role: role, action: action) {
+            Label(title, systemImage: systemImage)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .frame(minWidth: 168)
+                .background(
+                    LinearGradient(
+                        colors: role == .destructive
+                            ? [MoPilotPalette.rose, MoPilotPalette.amber.opacity(0.9)]
+                            : [MoPilotPalette.violet, MoPilotPalette.blue, MoPilotPalette.teal],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .clipShape(Capsule())
+                .shadow(color: MoPilotPalette.blue.opacity(isHovered ? 0.28 : 0.14), radius: isHovered ? 18 : 10, x: 0, y: 8)
+        }
+        .buttonStyle(.plain)
+        .scaleEffect(isHovered ? 1.025 : 1)
+        .animation(.easeOut(duration: 0.16), value: isHovered)
+        .onHover { isHovered = $0 }
     }
 }
 

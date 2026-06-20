@@ -14,32 +14,7 @@ struct CleanView: View {
             runner: runner
         ) {
             if let moPath = appState.cliStatus.path {
-                ProductCard(title: "清理预览", systemImage: "sparkles") {
-                    Text("MoPilot 会先调用 mo clean --dry-run，把将要清理的内容显示出来。确认无误后，真实清理按钮才会启用。")
-                        .foregroundStyle(.secondary)
-
-                    HStack {
-                        Button {
-                            didAutoPreview = true
-                            runner.run(.cleanDryRun, moPath: moPath)
-                        } label: {
-                            Label("重新预览", systemImage: "doc.text.magnifyingglass")
-                        }
-                        .disabled(runner.isRunning)
-
-                        Button {
-                            showCleanConfirmation = true
-                        } label: {
-                            Label("执行清理", systemImage: "trash")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
-                        .disabled(runner.isRunning || !runner.hasSuccessfulRun(.cleanDryRun))
-
-                        RunnerCancelButton(runner: runner)
-                        CopyLogButton(text: runner.logText)
-                    }
-                }
+                cleanScanPanel(moPath: moPath)
             } else {
                 CLIUnavailableView(message: missingMessage)
             }
@@ -66,5 +41,87 @@ struct CleanView: View {
             return message
         }
         return "未检测到 Mole CLI，请先安装：brew install mole"
+    }
+
+    private func cleanScanPanel(moPath: String) -> some View {
+        HStack(spacing: 28) {
+            SmartScannerOrb(
+                systemImage: runner.isRunning ? "magnifyingglass" : runner.hasSuccessfulRun(.cleanDryRun) ? "checkmark.shield" : "sparkles",
+                title: runner.isRunning ? "Scanning" : runner.hasSuccessfulRun(.cleanDryRun) ? "Preview" : "Clean",
+                subtitle: runner.isRunning ? "dry-run" : runner.hasSuccessfulRun(.cleanDryRun) ? "ready" : "safe scan",
+                isActive: runner.isRunning || !runner.hasSuccessfulRun(.cleanDryRun)
+            )
+            .frame(width: 220, height: 220)
+
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(runner.hasSuccessfulRun(.cleanDryRun) ? "预览已完成" : "安全清理扫描")
+                        .font(.title.weight(.bold))
+                    Text(runner.hasSuccessfulRun(.cleanDryRun) ? "你可以查看日志确认范围，再执行真实清理。" : "先运行 dry-run，只预览、不删除。")
+                        .foregroundStyle(.secondary)
+                }
+
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                    scanTile("系统缓存", "sudo 项会提示", "externaldrive.badge.timemachine", MoPilotPalette.blue)
+                    scanTile("应用缓存", "预览后清理", "app.dashed", MoPilotPalette.mint)
+                    scanTile("日志输出", "自动保存", "doc.text", MoPilotPalette.amber)
+                }
+
+                HStack(spacing: 12) {
+                    SmartActionButton(title: runner.hasSuccessfulRun(.cleanDryRun) ? "重新扫描" : "开始扫描", systemImage: "magnifyingglass") {
+                        didAutoPreview = true
+                        runner.run(.cleanDryRun, moPath: moPath)
+                    }
+                    .disabled(runner.isRunning)
+
+                    Button(role: .destructive) {
+                        showCleanConfirmation = true
+                    } label: {
+                        Label("清理", systemImage: "trash")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                    .disabled(runner.isRunning || !runner.hasSuccessfulRun(.cleanDryRun))
+
+                    RunnerCancelButton(runner: runner)
+                    CopyLogButton(text: runner.logText)
+                }
+            }
+        }
+        .padding(24)
+        .background(.regularMaterial)
+        .background(
+            LinearGradient(
+                colors: [
+                    MoPilotPalette.mint.opacity(0.18),
+                    MoPilotPalette.teal.opacity(0.12),
+                    MoPilotPalette.blue.opacity(0.10)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(MoPilotPalette.mint.opacity(0.22), lineWidth: 1)
+        }
+    }
+
+    private func scanTile(_ title: String, _ value: String, _ icon: String, _ accent: Color) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(accent)
+            Text(title)
+                .font(.headline)
+            Text(value)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }

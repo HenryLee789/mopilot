@@ -5,92 +5,125 @@ struct DashboardView: View {
     @Binding var selection: AppSection
 
     var body: some View {
-        MoPilotPage(maxWidth: 1100) {
-            PageHeader(
-                title: "MoPilot",
-                subtitle: "非官方 GUI Wrapper，只调用本机已安装的 Mole CLI。先预览，再执行。",
-                systemImage: "wrench.and.screwdriver"
-            )
-
-            dashboardHero
-
-            HStack(alignment: .top, spacing: 14) {
-                ProductCard(title: "CLI 连接", systemImage: appState.cliStatus.isInstalled ? "checkmark.seal" : "exclamationmark.triangle") {
-                    cliStatusContent
+        MoPilotPage(maxWidth: 1180) {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Smart Care")
+                        .font(.system(size: 42, weight: .bold))
+                    Text("非官方 GUI Wrapper，只调用本机 Mole CLI。")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
 
-                ProductCard(title: "安全保护", systemImage: "lock.shield") {
-                    Label("Clean / Optimize 必须先 dry-run", systemImage: "doc.text.magnifyingglass")
-                    Label("真实执行前必须再次确认", systemImage: "hand.raised")
-                    Label("不会静默输入 sudo 密码", systemImage: "lock")
-                    Label("Uninstall 默认移入废纸篓", systemImage: "trash")
-                }
+                Spacer()
+
+                statusPill
             }
 
-            ProductCard(title: "当前 Mac", systemImage: "desktopcomputer") {
-                Grid(alignment: .leading, horizontalSpacing: 18, verticalSpacing: 10) {
-                    infoGridRow("macOS", appState.systemInfo.macOSVersion)
-                    infoGridRow("芯片架构", appState.systemInfo.architecture)
-                    infoGridRow("磁盘可用", appState.systemInfo.freeDiskSpace)
-                    infoGridRow("磁盘总量", appState.systemInfo.totalDiskSpace)
-                    infoGridRow("Analyze", appState.capabilities.analyzeModeDescription)
-                    infoGridRow("Status", appState.capabilities.statusModeDescription)
-                }
-            }
-
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 190), spacing: 12)], spacing: 12) {
-                entryButton(.clean, note: "扫描缓存并预览")
-                entryButton(.analyze, note: "分析磁盘占用")
-                entryButton(.uninstall, note: "选择应用并卸载")
-                entryButton(.optimize, note: "预览系统优化项")
-                entryButton(.status, note: "查看系统状态")
-            }
+            smartCarePanel
+            summaryGrid
+            toolGrid
         }
     }
 
-    private var dashboardHero: some View {
-        ProductCard(title: "维护驾驶舱", systemImage: "sparkles") {
-            HStack(spacing: 22) {
-                AnimatedScanRing(systemImage: appState.cliStatus.isInstalled ? "checkmark.shield" : "exclamationmark.triangle", isActive: appState.cliStatus.isInstalled)
-                    .frame(width: 128, height: 128)
+    private var smartCarePanel: some View {
+        HStack(spacing: 30) {
+            SmartScannerOrb(
+                systemImage: appState.cliStatus.isInstalled ? "checkmark.shield" : "exclamationmark.triangle",
+                title: appState.cliStatus.isInstalled ? "Ready" : "Missing",
+                subtitle: appState.cliStatus.isInstalled ? "mo connected" : "install mo",
+                isActive: appState.cliStatus.isInstalled
+            )
+            .frame(width: 250, height: 250)
 
-                VStack(alignment: .leading, spacing: 14) {
-                    Text(appState.cliStatus.isInstalled ? "Mole CLI 已就绪" : "需要安装 Mole CLI")
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 7) {
+                    Text(appState.cliStatus.isInstalled ? "准备好进行一次安全扫描" : "未检测到 Mole CLI")
                         .font(.title.weight(.bold))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-
-                    Text(appState.cliStatus.isInstalled ? "你可以先运行清理预览、磁盘分析或系统状态检查。所有高风险操作都会保留确认步骤。" : "MoPilot 只负责图形界面包装，需要先安装本机 mo 命令。")
+                        .lineLimit(2)
+                    Text(appState.cliStatus.isInstalled ? "先预览缓存清理、磁盘占用和系统状态。真实清理、优化、卸载都保留确认步骤。" : "安装 Mole CLI 后，MoPilot 才能开始扫描和预览。")
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
+                }
 
-                    diskMeter
+                diskMeter
 
-                    HStack {
-                        Button {
-                            selection = .clean
-                        } label: {
-                            Label("开始 Clean 预览", systemImage: "sparkles")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(!appState.cliStatus.isInstalled)
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                    miniStatus("CLI", appState.cliStatus.isInstalled ? "已连接" : "未检测", "terminal", appState.cliStatus.isInstalled ? MoPilotPalette.mint : MoPilotPalette.amber)
+                    miniStatus("保护", "dry-run 优先", "lock.shield", MoPilotPalette.blue)
+                    miniStatus("Analyze", appState.capabilities.analyzeJSONFlag ?? "日志模式", "chart.pie", MoPilotPalette.teal)
+                    miniStatus("Status", appState.capabilities.statusJSONFlag ?? "日志模式", "waveform.path.ecg", MoPilotPalette.violet)
+                }
 
-                        Button {
-                            selection = .status
-                        } label: {
-                            Label("查看状态", systemImage: "waveform.path.ecg")
-                        }
-                        .disabled(!appState.cliStatus.isInstalled)
+                HStack(spacing: 12) {
+                    SmartActionButton(title: "扫描", systemImage: "magnifyingglass") {
+                        selection = .clean
+                    }
+                    .disabled(!appState.cliStatus.isInstalled)
 
-                        Button {
-                            Task { await appState.refresh() }
-                        } label: {
-                            Label("重新检测", systemImage: "arrow.clockwise")
-                        }
+                    Button {
+                        selection = .analyze
+                    } label: {
+                        Label("磁盘分析", systemImage: "chart.pie")
+                    }
+                    .disabled(!appState.cliStatus.isInstalled)
+
+                    Button {
+                        Task { await appState.refresh() }
+                    } label: {
+                        Label("重新检测", systemImage: "arrow.clockwise")
                     }
                 }
             }
         }
+        .padding(24)
+        .background(.regularMaterial)
+        .background(
+            LinearGradient(
+                colors: [
+                    MoPilotPalette.violet.opacity(0.22),
+                    MoPilotPalette.blue.opacity(0.16),
+                    MoPilotPalette.teal.opacity(0.14),
+                    MoPilotPalette.magenta.opacity(0.08)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(.white.opacity(0.18), lineWidth: 1)
+        }
+        .shadow(color: MoPilotPalette.blue.opacity(0.18), radius: 24, x: 0, y: 16)
+    }
+
+    private var summaryGrid: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 210), spacing: 12)], spacing: 12) {
+            SummaryTile(title: "macOS", value: appState.systemInfo.macOSVersion, systemImage: "macwindow", accent: MoPilotPalette.blue)
+            SummaryTile(title: "芯片", value: appState.systemInfo.architecture, systemImage: "cpu", accent: MoPilotPalette.violet)
+            SummaryTile(title: "可用空间", value: appState.systemInfo.freeDiskSpace, systemImage: "internaldrive", accent: MoPilotPalette.mint)
+            SummaryTile(title: "日志目录", value: "~/Library/Logs/MoPilot", systemImage: "doc.text", accent: MoPilotPalette.amber)
+        }
+    }
+
+    private var toolGrid: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 245), spacing: 12)], spacing: 12) {
+            module(.clean, subtitle: "缓存 dry-run 预览", accent: MoPilotPalette.mint)
+            module(.analyze, subtitle: "找出空间占用", accent: MoPilotPalette.teal)
+            module(.uninstall, subtitle: "选择应用与残留", accent: MoPilotPalette.rose)
+            module(.optimize, subtitle: "系统优化预览", accent: MoPilotPalette.amber)
+            module(.status, subtitle: "CPU/内存/网络", accent: MoPilotPalette.violet)
+        }
+    }
+
+    private var statusPill: some View {
+        Label(appState.cliStatus.isInstalled ? "Mole CLI 已就绪" : "需要安装 mo", systemImage: appState.cliStatus.isInstalled ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+            .font(.callout.weight(.semibold))
+            .foregroundStyle(appState.cliStatus.isInstalled ? MoPilotPalette.mint : MoPilotPalette.amber)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(.regularMaterial, in: Capsule())
     }
 
     private var diskMeter: some View {
@@ -111,16 +144,15 @@ struct DashboardView: View {
                         .fill(Color.secondary.opacity(0.12))
                     Capsule()
                         .fill(LinearGradient(
-                            colors: [MoPilotPalette.mint, MoPilotPalette.teal, MoPilotPalette.amber.opacity(0.85)],
+                            colors: [MoPilotPalette.mint, MoPilotPalette.teal, MoPilotPalette.blue, MoPilotPalette.magenta],
                             startPoint: .leading,
                             endPoint: .trailing
                         ))
-                        .frame(width: max(10, proxy.size.width * diskFreeRatio))
+                        .frame(width: max(12, proxy.size.width * diskFreeRatio))
                 }
             }
-            .frame(height: 10)
+            .frame(height: 12)
         }
-        .frame(maxWidth: 520)
     }
 
     private var diskFreeRatio: CGFloat {
@@ -132,104 +164,79 @@ struct DashboardView: View {
         return CGFloat(min(max(free / total, 0.05), 1))
     }
 
-    @ViewBuilder
-    private var cliStatusContent: some View {
-        HStack {
-            Image(systemName: appState.cliStatus.isInstalled ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                .foregroundStyle(appState.cliStatus.isInstalled ? MoPilotPalette.mint : MoPilotPalette.amber)
-            Text(appState.cliStatus.statusText)
-                .font(.headline)
-            Spacer()
-            Button("重新检测") {
-                Task { await appState.refresh() }
-            }
-        }
-
-        switch appState.cliStatus {
-        case .checking:
-            Text("正在执行 /usr/bin/env which mo")
-                .foregroundStyle(.secondary)
-        case .missing(let message):
-            VStack(alignment: .leading, spacing: 8) {
-                Text(message)
+    private func miniStatus(_ title: String, _ value: String, _ icon: String, _ accent: Color) -> some View {
+        HStack(spacing: 9) {
+            Image(systemName: icon)
+                .foregroundStyle(accent)
+                .frame(width: 20)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
-                Text("安装命令：brew install mole")
-                    .font(.system(.body, design: .monospaced))
-                    .textSelection(.enabled)
+                Text(value)
+                    .font(.callout.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
             }
-        case .installed(let path, let version):
-            InfoRow(label: "路径", value: path)
-            InfoRow(label: "版本", value: version)
+            Spacer()
         }
+        .padding(10)
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
-    private func infoGridRow(_ label: String, _ value: String) -> some View {
-        GridRow {
-            Text(label)
-                .foregroundStyle(.secondary)
-            Text(value)
-                .textSelection(.enabled)
-        }
-    }
-
-    private func entryButton(_ section: AppSection, note: String) -> some View {
-        Button {
+    private func module(_ section: AppSection, subtitle: String, accent: Color) -> some View {
+        SmartModuleTile(
+            title: section.shortTitle,
+            subtitle: subtitle,
+            systemImage: section.systemImage,
+            accent: accent,
+            isEnabled: appState.cliStatus.isInstalled
+        ) {
             selection = section
-        } label: {
-            HStack(spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(sectionAccent(section).opacity(0.14))
-                    Image(systemName: section.systemImage)
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(sectionAccent(section))
-                }
-                .frame(width: 42, height: 42)
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(section.shortTitle)
-                        .font(.headline)
-                    Text(note)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-                Spacer()
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity, minHeight: 74, alignment: .leading)
-            .background(.regularMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(sectionAccent(section).opacity(0.2), lineWidth: 1)
-            }
-        }
-        .buttonStyle(.plain)
-        .disabled(!appState.cliStatus.isInstalled && section != .settings)
-    }
-
-    private func sectionAccent(_ section: AppSection) -> Color {
-        switch section {
-        case .dashboard:
-            return MoPilotPalette.teal
-        case .clean:
-            return MoPilotPalette.mint
-        case .analyze:
-            return MoPilotPalette.blue
-        case .uninstall:
-            return MoPilotPalette.rose
-        case .optimize:
-            return MoPilotPalette.amber
-        case .status:
-            return MoPilotPalette.teal
-        case .settings:
-            return .secondary
         }
     }
 
     private func numericPrefix(_ text: String) -> Double? {
         let token = text.split(separator: " ").first.map(String.init) ?? text
         return Double(token)
+    }
+}
+
+private struct SummaryTile: View {
+    let title: String
+    let value: String
+    let systemImage: String
+    let accent: Color
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(accent.opacity(0.15))
+                Image(systemName: systemImage)
+                    .foregroundStyle(accent)
+            }
+            .frame(width: 38, height: 38)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(value)
+                    .font(.callout.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+            }
+
+            Spacer()
+        }
+        .padding(13)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(accent.opacity(0.14), lineWidth: 1)
+        }
     }
 }

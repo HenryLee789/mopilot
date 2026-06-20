@@ -33,7 +33,7 @@ enum AppSection: String, CaseIterable, Identifiable {
     var shortTitle: String {
         switch self {
         case .dashboard:
-            "Dashboard"
+            "Smart Care"
         case .clean:
             "Clean"
         case .analyze:
@@ -46,6 +46,25 @@ enum AppSection: String, CaseIterable, Identifiable {
             "Status"
         case .settings:
             "Settings"
+        }
+    }
+
+    var sidebarSubtitle: String {
+        switch self {
+        case .dashboard:
+            "总览与扫描入口"
+        case .clean:
+            "缓存 dry-run"
+        case .analyze:
+            "空间占用"
+        case .uninstall:
+            "应用与残留"
+        case .optimize:
+            "系统优化"
+        case .status:
+            "性能状态"
+        case .settings:
+            "路径与日志"
         }
     }
 

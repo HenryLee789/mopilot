@@ -6,12 +6,14 @@ MoPilot 是一个 macOS 图形界面工具，只调用本机已安装的 Mole CL
 
 ![MoPilot Dashboard](assets/screenshots/dashboard.png)
 
+![MoPilot Clean](assets/screenshots/clean.png)
+
 ![MoPilot Uninstall](assets/screenshots/uninstall.png)
 
 ## Features
 
 - 原生 SwiftUI macOS App，目标 macOS 13+
-- 动态扫描环、柔和玻璃面板和更完整的维护工具视觉层
+- 自定义维护工具式侧边栏、Smart Care 风格主扫描面板和动态扫描球
 - 启动时执行 `/usr/bin/env which mo` 检测 Mole CLI
 - Dashboard 展示 CLI 状态、版本、Mac 信息、磁盘空间和安全保护状态
 - Clean / Optimize 必须先 dry-run，真实执行前再次确认
