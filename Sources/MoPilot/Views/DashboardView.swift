@@ -38,7 +38,7 @@ struct DashboardView: View {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: 12)], spacing: 12) {
                     entryButton(.clean, note: "先 dry-run，再确认清理")
                     entryButton(.analyze, note: "JSON 优先，日志兜底")
-                    entryButton(.uninstall, note: "预览后终端交互")
+                    entryButton(.uninstall, note: "GUI 选择，后台卸载")
                     entryButton(.optimize, note: "先 dry-run，再确认优化")
                     entryButton(.status, note: "状态卡片与原始日志")
                 }

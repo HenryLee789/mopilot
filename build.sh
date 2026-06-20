@@ -9,6 +9,7 @@ fi
 APP_DISPLAY_NAME="MoPilot"
 EXECUTABLE_NAME="MoPilot"
 BUNDLE_ID="io.github.mopilot.app"
+APP_VERSION="0.2.0"
 MIN_SYSTEM_VERSION="13.0"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -51,9 +52,9 @@ cat >"$INFO_PLIST" <<PLIST
   <key>CFBundleIconFile</key>
   <string>AppIcon</string>
   <key>CFBundleVersion</key>
-  <string>0.1.0</string>
+  <string>$APP_VERSION</string>
   <key>CFBundleShortVersionString</key>
-  <string>0.1.0</string>
+  <string>$APP_VERSION</string>
   <key>LSMinimumSystemVersion</key>
   <string>$MIN_SYSTEM_VERSION</string>
   <key>NSPrincipalClass</key>

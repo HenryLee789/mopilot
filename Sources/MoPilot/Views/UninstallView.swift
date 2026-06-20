@@ -3,69 +3,253 @@ import SwiftUI
 struct UninstallView: View {
     @EnvironmentObject private var appState: MoleAppState
     @StateObject private var runner = CommandRunner()
-    @State private var showTerminalConfirmation = false
-    @State private var launchMessage = ""
+
+    @State private var apps: [InstalledApp] = []
+    @State private var selectedNames: Set<String> = []
+    @State private var previewedNames: Set<String> = []
+    @State private var previewCandidateNames: Set<String> = []
+    @State private var searchText = ""
+    @State private var isLoadingApps = false
+    @State private var listMessage = ""
+    @State private var showUninstallConfirmation = false
+    @State private var lastRunWasPreview = false
+    @State private var lastRunWasUninstall = false
+    @State private var hasLoadedOnce = false
 
     var body: some View {
         CommandPageLayout(
-            title: "Uninstall 卸载残留",
-            subtitle: "先运行 mo uninstall --dry-run 预览；真实卸载只通过 Terminal.app 交互执行。即使 mo 进入 TUI，MoPilot 也不会自动确认删除。",
+            title: "Uninstall 应用卸载",
+            subtitle: "在图形界面中选择应用，先 dry-run 预览，再确认后台调用 mo uninstall 完成卸载。默认移入废纸篓，不使用永久删除。",
             runner: runner
         ) {
-            VStack(alignment: .leading, spacing: 12) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("该功能可能涉及应用卸载和残留扫描。", systemImage: "exclamationmark.triangle")
-                    Label("MoPilot 不会自动确认删除选项。", systemImage: "hand.raised")
-                    Label("如 mo 需要管理员权限，请在终端中自行确认。", systemImage: "lock")
-                }
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 14) {
+                safetyNotes
 
                 if let moPath = appState.cliStatus.path {
-                    HStack {
-                        Button {
-                            runner.run(.uninstallDryRun, moPath: moPath)
-                        } label: {
-                            Label("预览卸载扫描", systemImage: "doc.text.magnifyingglass")
-                        }
-                        .disabled(runner.isRunning)
-
-                        Button {
-                            showTerminalConfirmation = true
-                        } label: {
-                            Label("打开终端运行 mo uninstall", systemImage: "terminal")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.orange)
-                        .disabled(runner.isRunning)
-
-                        RunnerCancelButton(runner: runner)
-                        CopyLogButton(text: runner.logText)
-                    }
-                    Text(launchMessage)
-                        .foregroundStyle(.secondary)
+                    toolbar(moPath: moPath)
+                    appList
+                    selectedSummary
                 } else {
                     CLIUnavailableView(message: missingMessage)
                 }
             }
         }
-        .alert("在终端中运行卸载扫描", isPresented: $showTerminalConfirmation) {
+        .task(id: appState.cliStatus.path) {
+            guard let moPath = appState.cliStatus.path, !hasLoadedOnce else { return }
+            hasLoadedOnce = true
+            await refreshApps(moPath: moPath)
+        }
+        .onChange(of: selectedNames) { _ in
+            if previewedNames != selectedNames {
+                previewedNames = []
+            }
+        }
+        .onChange(of: runner.status) { status in
+            switch status {
+            case .succeeded where lastRunWasPreview:
+                previewedNames = previewCandidateNames
+                lastRunWasPreview = false
+            case .succeeded where lastRunWasUninstall:
+                selectedNames = []
+                previewedNames = []
+                previewCandidateNames = []
+                lastRunWasUninstall = false
+                if let moPath = appState.cliStatus.path {
+                    Task { await refreshApps(moPath: moPath) }
+                }
+            case .failed, .cancelled, .launchFailed:
+                lastRunWasPreview = false
+                lastRunWasUninstall = false
+            default:
+                break
+            }
+        }
+        .alert("确认卸载应用", isPresented: $showUninstallConfirmation) {
             Button("取消", role: .cancel) {}
-            Button("打开终端") {
-                openTerminal()
+            Button("卸载到废纸篓", role: .destructive) {
+                if let moPath = appState.cliStatus.path {
+                    runUninstall(moPath: moPath)
+                }
             }
         } message: {
-            Text("即将打开 Terminal.app 并运行 mo uninstall。请在终端中查看交互提示，不要盲目确认删除。")
+            Text("即将后台执行 mo uninstall \(selectedNamesForCommand.joined(separator: " "))。MoPilot 会在你确认后向 mo 发送确认输入。请确认你已经查看 dry-run 预览。")
         }
     }
 
-    private func openTerminal() {
-        guard let moPath = appState.cliStatus.path else { return }
-        do {
-            try AppleScriptTerminalLauncher.openTerminal(command: ShellEscaping.commandLine([moPath, "uninstall"]))
-            launchMessage = "已请求打开 Terminal.app。"
-        } catch {
-            launchMessage = "打开终端失败：\(error.localizedDescription)"
+    private var safetyNotes: some View {
+        ProductCard(title: "安全流程", systemImage: "lock.shield") {
+            Label("卸载前必须先选择应用并执行 dry-run 预览。", systemImage: "doc.text.magnifyingglass")
+            Label("点击卸载后 MoPilot 后台运行 mo uninstall，不再打开 Terminal.app。", systemImage: "desktopcomputer")
+            Label("默认移动到 macOS 废纸篓，不使用 --permanent。", systemImage: "trash")
         }
+    }
+
+    private func toolbar(moPath: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                TextField("搜索应用、Bundle ID 或路径", text: $searchText)
+                    .textFieldStyle(.roundedBorder)
+
+                Button {
+                    Task { await refreshApps(moPath: moPath) }
+                } label: {
+                    Label("刷新列表", systemImage: "arrow.clockwise")
+                }
+                .disabled(isLoadingApps || runner.isRunning)
+            }
+
+            HStack {
+                Button {
+                    runPreview(moPath: moPath)
+                } label: {
+                    Label("预览选中应用", systemImage: "doc.text.magnifyingglass")
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(selectedNames.isEmpty || runner.isRunning)
+
+                Button {
+                    showUninstallConfirmation = true
+                } label: {
+                    Label("卸载选中应用", systemImage: "trash")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .disabled(!canUninstallSelected || runner.isRunning)
+
+                RunnerCancelButton(runner: runner)
+                CopyLogButton(text: runner.logText)
+            }
+
+            if !listMessage.isEmpty {
+                Text(listMessage)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var appList: some View {
+        ProductCard(title: "已安装应用", systemImage: "square.grid.2x2") {
+            if isLoadingApps {
+                HStack {
+                    ProgressView()
+                    Text("正在读取 mo uninstall --list...")
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else if filteredApps.isEmpty {
+                Text(apps.isEmpty ? "暂无应用列表，点击刷新列表。" : "没有匹配的应用。")
+                    .foregroundStyle(.secondary)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 8) {
+                        ForEach(filteredApps) { app in
+                            UninstallAppRow(
+                                app: app,
+                                isSelected: selectedNames.contains(app.uninstallName),
+                                duplicateCount: duplicateCount(for: app),
+                                isSelfApp: isSelfApp(app),
+                                toggle: { toggle(app) }
+                            )
+                        }
+                    }
+                }
+                .frame(minHeight: 220, maxHeight: 360)
+            }
+        }
+    }
+
+    private var selectedSummary: some View {
+        ProductCard(title: "选中项", systemImage: "checklist") {
+            if selectedApps.isEmpty {
+                Text("尚未选择应用。")
+                    .foregroundStyle(.secondary)
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("已选择 \(selectedApps.count) 个应用，传给 mo 的卸载名：\(selectedNamesForCommand.joined(separator: ", "))")
+                        .textSelection(.enabled)
+                    Text(canUninstallSelected ? "dry-run 已完成，可以执行卸载。" : "请先预览当前选中项。")
+                        .foregroundStyle(canUninstallSelected ? .green : .secondary)
+                }
+            }
+        }
+    }
+
+    private var filteredApps: [InstalledApp] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !query.isEmpty else { return apps }
+        return apps.filter { app in
+            app.name.lowercased().contains(query) ||
+            app.bundleID.lowercased().contains(query) ||
+            app.path.lowercased().contains(query) ||
+            app.uninstallName.lowercased().contains(query)
+        }
+    }
+
+    private var selectedApps: [InstalledApp] {
+        apps.filter { selectedNames.contains($0.uninstallName) }
+    }
+
+    private var selectedNamesForCommand: [String] {
+        apps.map(\.uninstallName).filter { selectedNames.contains($0) }.uniqued()
+    }
+
+    private var canUninstallSelected: Bool {
+        !selectedNames.isEmpty && previewedNames == selectedNames
+    }
+
+    private func refreshApps(moPath: String) async {
+        isLoadingApps = true
+        listMessage = ""
+        do {
+            let loadedApps = try await MoleUninstallService.listInstalledApps(moPath: moPath)
+            apps = loadedApps
+            selectedNames = selectedNames.intersection(Set(loadedApps.map(\.uninstallName)))
+            previewedNames = []
+            listMessage = "已加载 \(loadedApps.count) 个应用。"
+        } catch {
+            listMessage = error.localizedDescription
+        }
+        isLoadingApps = false
+    }
+
+    private func toggle(_ app: InstalledApp) {
+        guard !isSelfApp(app) else { return }
+        if selectedNames.contains(app.uninstallName) {
+            selectedNames.remove(app.uninstallName)
+        } else {
+            selectedNames.insert(app.uninstallName)
+        }
+    }
+
+    private func runPreview(moPath: String) {
+        previewCandidateNames = selectedNames
+        lastRunWasPreview = true
+        runner.run(
+            .uninstallDryRun,
+            moPath: moPath,
+            arguments: ["uninstall", "--dry-run"] + selectedNamesForCommand,
+            standardInput: "y\n"
+        )
+    }
+
+    private func runUninstall(moPath: String) {
+        lastRunWasPreview = false
+        lastRunWasUninstall = true
+        runner.run(
+            .uninstall,
+            moPath: moPath,
+            arguments: ["uninstall"] + selectedNamesForCommand,
+            standardInput: "y\n"
+        )
+    }
+
+    private func duplicateCount(for app: InstalledApp) -> Int {
+        apps.filter { $0.uninstallName == app.uninstallName }.count
+    }
+
+    private func isSelfApp(_ app: InstalledApp) -> Bool {
+        app.bundleID == "io.github.mopilot.app"
     }
 
     private var missingMessage: String {
@@ -73,5 +257,71 @@ struct UninstallView: View {
             return message
         }
         return "未检测到 Mole CLI，请先安装：brew install mole"
+    }
+}
+
+private struct UninstallAppRow: View {
+    let app: InstalledApp
+    let isSelected: Bool
+    let duplicateCount: Int
+    let isSelfApp: Bool
+    let toggle: () -> Void
+
+    var body: some View {
+        Button(action: toggle) {
+            HStack(spacing: 12) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(isSelected ? .teal : .secondary)
+                    .font(.title3)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text(app.name)
+                            .font(.headline)
+                        Text(app.size)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        if duplicateCount > 1 {
+                            Text("同名 \(duplicateCount) 个")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                        if isSelfApp {
+                            Text("当前应用")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    Text(app.path)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Text(app.bundleID)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
+
+                Spacer()
+            }
+            .padding(10)
+            .background(isSelected ? Color.teal.opacity(0.12) : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(isSelected ? Color.teal.opacity(0.45) : Color.secondary.opacity(0.12), lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(isSelfApp)
+        .opacity(isSelfApp ? 0.55 : 1)
+    }
+}
+
+private extension Array where Element: Hashable {
+    func uniqued() -> [Element] {
+        var seen = Set<Element>()
+        return filter { seen.insert($0).inserted }
     }
 }

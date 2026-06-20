@@ -5,6 +5,7 @@ enum MoleCommand: String, Hashable {
     case clean
     case analyze
     case status
+    case uninstall
     case uninstallDryRun
     case optimizeDryRun
     case optimize
@@ -19,6 +20,8 @@ enum MoleCommand: String, Hashable {
             "Analyze"
         case .status:
             "Status"
+        case .uninstall:
+            "Uninstall"
         case .uninstallDryRun:
             "Uninstall Dry Run"
         case .optimizeDryRun:
@@ -38,6 +41,8 @@ enum MoleCommand: String, Hashable {
             "analyze"
         case .status:
             "status"
+        case .uninstall:
+            "uninstall"
         case .uninstallDryRun:
             "uninstall-dry-run"
         case .optimizeDryRun:
@@ -57,6 +62,8 @@ enum MoleCommand: String, Hashable {
             ["analyze"]
         case .status:
             ["status"]
+        case .uninstall:
+            ["uninstall"]
         case .uninstallDryRun:
             ["uninstall", "--dry-run"]
         case .optimizeDryRun:

@@ -13,6 +13,6 @@ For Mole CLI behavior, review the Mole project directly:
 ## Safety Defaults
 
 - Clean and Optimize require dry-run preview before real execution.
-- Uninstall real execution is launched in Terminal.app for interactive user control.
+- Uninstall real execution runs in the app only after GUI selection, dry-run preview, and explicit confirmation.
 - MoPilot does not store passwords or silently provide administrator credentials.
 - Command logs are written to `~/Library/Logs/MoPilot/`.

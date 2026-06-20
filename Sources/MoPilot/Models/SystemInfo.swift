@@ -36,3 +36,25 @@ struct ProcessMetric: Identifiable, Equatable {
     let cpu: String
     let memory: String
 }
+
+struct InstalledApp: Identifiable, Decodable, Equatable {
+    let name: String
+    let bundleID: String
+    let source: String
+    let uninstallName: String
+    let path: String
+    let size: String
+
+    var id: String {
+        "\(bundleID)|\(path)|\(uninstallName)"
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case bundleID = "bundle_id"
+        case source
+        case uninstallName = "uninstall_name"
+        case path
+        case size
+    }
+}

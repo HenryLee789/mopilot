@@ -6,6 +6,8 @@ MoPilot 是一个 macOS 图形界面工具，只调用本机已安装的 Mole CL
 
 ![MoPilot Dashboard](assets/screenshots/dashboard.png)
 
+![MoPilot Uninstall](assets/screenshots/uninstall.png)
+
 ## Features
 
 - 原生 SwiftUI macOS App，目标 macOS 13+
@@ -14,7 +16,7 @@ MoPilot 是一个 macOS 图形界面工具，只调用本机已安装的 Mole CL
 - Clean / Optimize 必须先 dry-run，真实执行前再次确认
 - Analyze / Status 优先使用 JSON 输出构建表格和状态卡片
 - 当前 Mole CLI 不支持 JSON 参数或解析失败时，自动降级为原始日志
-- Uninstall 先 dry-run 预览，真实卸载只打开 Terminal.app 交互运行
+- Uninstall 读取 `mo uninstall --list`，在 GUI 中选择应用，dry-run 预览后后台卸载
 - 命令 stdout / stderr 实时显示，可取消、可复制、可保存日志
 - 日志默认保存到 `~/Library/Logs/MoPilot/`
 
@@ -80,7 +82,7 @@ open "dist/MoPilot.app"
 - Clean and Optimize require a successful dry-run preview before real execution.
 - Clean, Optimize, and Uninstall show confirmation before higher-risk actions.
 - MoPilot never silently enters a sudo password.
-- Interactive uninstall is delegated to Terminal.app so the user remains in control.
+- Uninstall runs in the app after a GUI selection, dry-run preview, and explicit confirmation.
 - MoPilot stores its own command logs under `~/Library/Logs/MoPilot/`.
 
 ## JSON Detection

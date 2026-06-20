@@ -25,7 +25,7 @@ final class CommandRunner: ObservableObject {
         self.logService = logService
     }
 
-    func run(_ command: MoleCommand, moPath: String, arguments: [String]? = nil) {
+    func run(_ command: MoleCommand, moPath: String, arguments: [String]? = nil, standardInput: String? = nil) {
         guard !isRunning else { return }
 
         let resolvedArguments = arguments ?? command.arguments
@@ -40,7 +40,8 @@ final class CommandRunner: ObservableObject {
         process.environment = ProcessEnvironment.defaultEnvironment
         process.standardOutput = outputPipe
         process.standardError = errorPipe
-        process.standardInput = Pipe()
+        let inputPipe = Pipe()
+        process.standardInput = inputPipe
 
         outputPipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
             let data = handle.availableData
@@ -73,6 +74,10 @@ final class CommandRunner: ObservableObject {
         do {
             try process.run()
             appendSystemLine("开始执行：\(activeCommandLine)")
+            if let standardInput {
+                inputPipe.fileHandleForWriting.write(Data(standardInput.utf8))
+            }
+            try? inputPipe.fileHandleForWriting.close()
         } catch {
             status = .launchFailed(error.localizedDescription)
             appendSystemLine("启动失败：\(error.localizedDescription)")
@@ -115,12 +120,13 @@ final class CommandRunner: ObservableObject {
     }
 
     private func appendOutput(_ text: String, isError: Bool) {
+        let cleanText = ANSITextCleaner.clean(text)
         if isError {
-            stderrText += text
+            stderrText += cleanText
         } else {
-            stdoutText += text
+            stdoutText += cleanText
         }
-        logText += text
+        logText += cleanText
     }
 
     private func appendSystemLine(_ text: String) {
