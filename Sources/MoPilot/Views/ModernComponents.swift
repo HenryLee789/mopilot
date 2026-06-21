@@ -15,6 +15,36 @@ extension Color {
     }
 }
 
+private struct PointerHoverModifier: ViewModifier {
+    let enabled: Bool
+    @State private var isInside = false
+
+    func body(content: Content) -> some View {
+        content
+            .onHover { inside in
+                guard enabled, inside != isInside else { return }
+                isInside = inside
+                if inside {
+                    NSCursor.pointingHand.push()
+                } else {
+                    NSCursor.pop()
+                }
+            }
+            .onDisappear {
+                if isInside {
+                    NSCursor.pop()
+                    isInside = false
+                }
+            }
+    }
+}
+
+extension View {
+    func pointingHandOnHover(_ enabled: Bool = true) -> some View {
+        modifier(PointerHoverModifier(enabled: enabled))
+    }
+}
+
 enum MoPilotTheme {
     case smartScan
     case cleanup
@@ -180,6 +210,7 @@ struct SidebarItem: View {
     let section: AppSection
     let isSelected: Bool
     let isEnabled: Bool
+    @State private var isHovered = false
 
     var body: some View {
         Label {
@@ -196,11 +227,22 @@ struct SidebarItem: View {
         } icon: {
             Image(systemName: section.systemImage)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(section.theme.accentColor)
+                .foregroundStyle(isSelected || isHovered ? section.theme.accentColor : Color.secondary)
                 .frame(width: 22)
+                .scaleEffect(isHovered && isEnabled ? 1.08 : 1)
         }
         .opacity(isEnabled ? 1 : 0.42)
-        .padding(.vertical, 3)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(section.theme.accentColor.opacity(isHovered && !isSelected && isEnabled ? 0.11 : 0))
+        }
+        .contentShape(Rectangle())
+        .pointingHandOnHover(isEnabled)
+        .onHover { isHovered = $0 }
+        .animation(.easeOut(duration: 0.14), value: isHovered)
     }
 }
 
@@ -317,6 +359,7 @@ struct FeatureCard: View {
     var accent: Color = MoPilotTheme.smartScan.accentColor
     var isEnabled = true
     var action: (() -> Void)?
+    @State private var isHovered = false
 
     var body: some View {
         Button {
@@ -326,8 +369,10 @@ struct FeatureCard: View {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(alignment: .top) {
                         IconBadge(systemImage: systemImage, accent: accent)
+                            .scaleEffect(isHovered && isEnabled ? 1.08 : 1)
                         Spacer()
                         StatusTag(title: status, accent: accent)
+                            .opacity(isHovered && isEnabled ? 1 : 0.86)
                     }
 
                     VStack(alignment: .leading, spacing: 6) {
@@ -348,7 +393,8 @@ struct FeatureCard: View {
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.caption.weight(.bold))
-                            .foregroundStyle(.tertiary)
+                            .foregroundStyle(isHovered && isEnabled ? accent : Color.secondary.opacity(0.55))
+                            .offset(x: isHovered && isEnabled ? 4 : 0)
                     }
                 }
             }
@@ -356,6 +402,11 @@ struct FeatureCard: View {
         .buttonStyle(.plain)
         .disabled(!isEnabled || action == nil)
         .opacity(isEnabled ? 1 : 0.45)
+        .scaleEffect(isHovered && isEnabled ? 1.018 : 1)
+        .offset(y: isHovered && isEnabled ? -3 : 0)
+        .pointingHandOnHover(isEnabled && action != nil)
+        .onHover { isHovered = $0 }
+        .animation(.easeOut(duration: 0.16), value: isHovered)
     }
 }
 
@@ -366,6 +417,7 @@ struct PrimaryButton: View {
     var isEnabled = true
     var theme: MoPilotTheme = .smartScan
     let action: () -> Void
+    @State private var isHovered = false
 
     var body: some View {
         Button(role: role, action: action) {
@@ -378,6 +430,13 @@ struct PrimaryButton: View {
         ))
         .disabled(!isEnabled)
         .opacity(isEnabled ? 1 : 0.45)
+        .brightness(isHovered && isEnabled ? 0.045 : 0)
+        .scaleEffect(isHovered && isEnabled ? 1.035 : 1)
+        .offset(y: isHovered && isEnabled ? -1 : 0)
+        .shadow(color: theme.accentColor.opacity(isHovered && isEnabled ? 0.26 : 0), radius: 14, y: 8)
+        .pointingHandOnHover(isEnabled)
+        .onHover { isHovered = $0 }
+        .animation(.easeOut(duration: 0.16), value: isHovered)
     }
 
     private var destructiveGradient: LinearGradient {
@@ -392,6 +451,7 @@ struct ScanButton: View {
     var isScanning = false
     var progress = 0.0
     let action: () -> Void
+    @State private var isHovered = false
 
     var body: some View {
         if isScanning {
@@ -401,6 +461,7 @@ struct ScanButton: View {
                 VStack(spacing: 6) {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 32, weight: .light))
+                        .scaleEffect(isHovered ? 1.08 : 1)
                     Text(title)
                         .font(.system(size: 18, weight: .semibold))
                     if let subtitle {
@@ -414,6 +475,13 @@ struct ScanButton: View {
                 gradient: theme.buttonGradient,
                 size: CGSize(width: 160, height: 160)
             ))
+            .brightness(isHovered ? 0.05 : 0)
+            .scaleEffect(isHovered ? 1.045 : 1)
+            .offset(y: isHovered ? -3 : 0)
+            .shadow(color: theme.accentColor.opacity(isHovered ? 0.32 : 0), radius: 20, y: 12)
+            .pointingHandOnHover()
+            .onHover { isHovered = $0 }
+            .animation(.spring(response: 0.24, dampingFraction: 0.78), value: isHovered)
         }
     }
 }
@@ -463,6 +531,7 @@ struct ResultPill: View {
     let label: String
     let value: String
     var theme: MoPilotTheme = .smartScan
+    @State private var isHovered = false
 
     var body: some View {
         VStack(spacing: 6) {
@@ -479,9 +548,47 @@ struct ResultPill: View {
         .frame(minWidth: 122)
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
-        .background(.primary.opacity(0.08))
+        .background(isHovered ? theme.accentColor.opacity(0.14) : Color.primary.opacity(0.08))
         .clipShape(MoPilotSuperEllipse(cornerRadius: 18))
         .foregroundStyle(.primary)
+        .scaleEffect(isHovered ? 1.025 : 1)
+        .onHover { isHovered = $0 }
+        .animation(.easeOut(duration: 0.15), value: isHovered)
+    }
+}
+
+struct SecondaryHoverButton: View {
+    let title: String
+    let systemImage: String
+    var isEnabled = true
+    var accent: Color = MoPilotTheme.smartScan.accentColor
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(isHovered && isEnabled ? accent : Color.primary.opacity(0.82))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background {
+                    Capsule(style: .continuous)
+                        .fill(isHovered && isEnabled ? accent.opacity(0.14) : Color.primary.opacity(0.07))
+                }
+                .overlay {
+                    Capsule(style: .continuous)
+                        .stroke(isHovered && isEnabled ? accent.opacity(0.36) : Color.primary.opacity(0.10), lineWidth: 1)
+                }
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+        .opacity(isEnabled ? 1 : 0.45)
+        .scaleEffect(isHovered && isEnabled ? 1.025 : 1)
+        .offset(y: isHovered && isEnabled ? -1 : 0)
+        .pointingHandOnHover(isEnabled)
+        .onHover { isHovered = $0 }
+        .animation(.easeOut(duration: 0.14), value: isHovered)
     }
 }
 

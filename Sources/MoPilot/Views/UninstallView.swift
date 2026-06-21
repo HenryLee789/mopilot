@@ -93,12 +93,14 @@ struct UninstallView: View {
                     TextField("搜索应用、Bundle ID 或路径", text: $searchText)
                         .textFieldStyle(.roundedBorder)
 
-                    Button {
+                    SecondaryHoverButton(
+                        title: "刷新列表",
+                        systemImage: "arrow.clockwise",
+                        isEnabled: !isLoadingApps && !runner.isRunning,
+                        accent: MoPilotTheme.applications.accentColor
+                    ) {
                         Task { await refreshApps(moPath: moPath) }
-                    } label: {
-                        Label("刷新列表", systemImage: "arrow.clockwise")
                     }
-                    .disabled(isLoadingApps || runner.isRunning)
                 }
 
                 HStack(spacing: 12) {
@@ -323,6 +325,9 @@ private struct UninstallAppRow: View {
         .buttonStyle(.plain)
         .disabled(isSelfApp)
         .opacity(isSelfApp ? 0.55 : 1)
+        .scaleEffect(isHovered && !isSelfApp ? 1.006 : 1)
+        .offset(x: isHovered && !isSelfApp ? 2 : 0)
+        .pointingHandOnHover(!isSelfApp)
         .onHover { isHovered = $0 }
         .animation(.easeOut(duration: 0.16), value: isHovered)
         .animation(.easeOut(duration: 0.16), value: isSelected)
@@ -332,8 +337,8 @@ private struct UninstallAppRow: View {
         if isSelected {
             return [MoPilotPalette.mint.opacity(0.18), MoPilotPalette.blue.opacity(0.10)]
         }
-        if isHovered {
-            return [Color.white.opacity(0.10), MoPilotPalette.teal.opacity(0.06)]
+        if isHovered && !isSelfApp {
+            return [MoPilotTheme.applications.accentColor.opacity(0.12), MoPilotTheme.applications.accentColor.opacity(0.05)]
         }
         return [Color.clear, Color.clear]
     }
@@ -342,8 +347,8 @@ private struct UninstallAppRow: View {
         if isSelected {
             return MoPilotPalette.teal.opacity(0.45)
         }
-        if isHovered {
-            return MoPilotPalette.teal.opacity(0.22)
+        if isHovered && !isSelfApp {
+            return MoPilotTheme.applications.accentColor.opacity(0.35)
         }
         return Color.secondary.opacity(0.12)
     }

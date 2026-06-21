@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.6.1
+
+- Added visible hover feedback for sidebar rows, collapsible section headers, Settings footer, primary scan controls, secondary action buttons, feature cards, result pills, and Uninstaller app rows.
+- Added pointing-hand cursor behavior for enabled interactive controls.
+- Replaced remaining default Settings and Uninstaller toolbar buttons with the unified MoPilot secondary button style.
+- Preserved the existing Mole CLI command execution, dry-run protection, confirmation dialogs, and logging behavior.
+- Updated app bundle metadata to version `0.6.1`.
+
 ## v0.6.0
 
 - Reworked the UI layer with Mac Sai-inspired SwiftUI structure and visual patterns while preserving MoPilot's own Mole CLI wrapper logic.

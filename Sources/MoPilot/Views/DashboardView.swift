@@ -7,6 +7,7 @@ struct DashboardView: View {
     @StateObject private var scanRunner = CommandRunner()
     @State private var scanProgress = 0.0
     @State private var showCleanConfirmation = false
+    @State private var isRetryHovered = false
 
     var body: some View {
         MoPilotPage(theme: .smartScan, maxWidth: 1180) {
@@ -85,13 +86,14 @@ struct DashboardView: View {
                             }
                         }
 
-                        Button {
+                        SecondaryHoverButton(
+                            title: "System Status",
+                            systemImage: "waveform.path.ecg",
+                            isEnabled: appState.cliStatus.isInstalled && !scanRunner.isRunning,
+                            accent: MoPilotTheme.smartScan.accentColor
+                        ) {
                             selection = .status
-                        } label: {
-                            Label("System Status", systemImage: "waveform.path.ecg")
                         }
-                        .buttonStyle(.bordered)
-                        .disabled(!appState.cliStatus.isInstalled || scanRunner.isRunning)
 
                         if scanRunner.isRunning {
                             RunnerCancelButton(runner: scanRunner)
@@ -115,6 +117,7 @@ struct DashboardView: View {
                 VStack(spacing: 6) {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 30, weight: .light))
+                        .scaleEffect(isRetryHovered ? 1.08 : 1)
                     Text("Retry")
                     Text("brew install mole")
                         .font(.system(size: 10))
@@ -122,6 +125,13 @@ struct DashboardView: View {
                 }
             }
             .buttonStyle(MoPilotSuperEllipseButtonStyle(gradient: MoPilotTheme.settings.buttonGradient, size: CGSize(width: 160, height: 160)))
+            .brightness(isRetryHovered ? 0.05 : 0)
+            .scaleEffect(isRetryHovered ? 1.045 : 1)
+            .offset(y: isRetryHovered ? -3 : 0)
+            .shadow(color: MoPilotTheme.settings.accentColor.opacity(isRetryHovered ? 0.28 : 0), radius: 18, y: 10)
+            .pointingHandOnHover()
+            .onHover { isRetryHovered = $0 }
+            .animation(.spring(response: 0.24, dampingFraction: 0.78), value: isRetryHovered)
         } else if scanRunner.isRunning {
             ScanProgressRing(progress: scanProgress, phase: "Scanning", detail: "mo clean --dry-run", theme: .smartScan)
         } else if scanRunner.hasSuccessfulRun(.cleanDryRun), !scanRunner.hasSuccessfulRun(.clean) {

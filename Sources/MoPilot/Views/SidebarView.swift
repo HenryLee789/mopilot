@@ -4,6 +4,7 @@ struct SidebarView: View {
     @Binding var selection: AppSection?
     let cliInstalled: Bool
     @State private var collapsedGroups: Set<SidebarGroup> = []
+    @State private var isSettingsHovered = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -63,19 +64,7 @@ struct SidebarView: View {
 
     private func sectionHeader(_ group: SidebarGroup) -> some View {
         let isCollapsed = collapsedGroups.contains(group)
-        return HStack(spacing: 6) {
-            Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(.secondary)
-                .frame(width: 14)
-            Text(group.title.uppercased())
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.secondary)
-            Spacer()
-        }
-        .padding(.top, 6)
-        .contentShape(Rectangle())
-        .onTapGesture {
+        return SidebarSectionHeader(group: group, isCollapsed: isCollapsed) {
             withAnimation(.easeInOut(duration: 0.18)) {
                 if isCollapsed {
                     collapsedGroups.remove(group)
@@ -98,17 +87,19 @@ struct SidebarView: View {
     }
 
     private var settingsFooter: some View {
-        Button {
+        let isSelected = selection == .settings
+        return Button {
             selection = .settings
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "gearshape")
-                    .font(.system(size: 13))
-                    .foregroundStyle(selection == .settings ? MoPilotTheme.settings.accentColor : Color.secondary)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(isSelected || isSettingsHovered ? MoPilotTheme.settings.accentColor : Color.secondary)
+                    .scaleEffect(isSettingsHovered ? 1.08 : 1)
                 Text("Settings")
                     .font(.system(size: 13, weight: .medium))
                 Spacer()
-                Text("v0.6.0")
+                Text("v0.6.1")
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(.tertiary)
             }
@@ -117,12 +108,32 @@ struct SidebarView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .foregroundStyle(isSelected || isSettingsHovered ? Color.primary : Color.primary.opacity(0.82))
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(selection == .settings ? Color.primary.opacity(0.10) : Color.clear)
+                .fill(settingsFooterFill(isSelected: isSelected))
         )
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(isSettingsHovered ? MoPilotTheme.settings.accentColor.opacity(0.22) : Color.clear, lineWidth: 1)
+        )
+        .scaleEffect(isSettingsHovered ? 1.012 : 1)
+        .offset(x: isSettingsHovered ? 2 : 0)
+        .pointingHandOnHover()
+        .onHover { isSettingsHovered = $0 }
+        .animation(.easeOut(duration: 0.14), value: isSettingsHovered)
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
+    }
+
+    private func settingsFooterFill(isSelected: Bool) -> Color {
+        if isSelected {
+            return MoPilotTheme.settings.accentColor.opacity(0.14)
+        }
+        if isSettingsHovered {
+            return MoPilotTheme.settings.accentColor.opacity(0.08)
+        }
+        return Color.clear
     }
 
     private var cliStatusFooter: some View {
@@ -145,5 +156,40 @@ struct SidebarView: View {
 
     private func isEnabled(_ section: AppSection) -> Bool {
         cliInstalled || section == .dashboard || section == .settings
+    }
+}
+
+private struct SidebarSectionHeader: View {
+    let group: SidebarGroup
+    let isCollapsed: Bool
+    let toggle: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: toggle) {
+            HStack(spacing: 6) {
+                Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(isHovered ? Color.primary.opacity(0.68) : Color.secondary)
+                    .frame(width: 14)
+                    .offset(x: isHovered ? 1 : 0)
+                Text(group.title.uppercased())
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(isHovered ? Color.primary.opacity(0.70) : Color.secondary)
+                Spacer()
+            }
+            .padding(.horizontal, 5)
+            .padding(.vertical, 5)
+            .background(
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(isHovered ? Color.primary.opacity(0.055) : Color.clear)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .pointingHandOnHover()
+        .onHover { isHovered = $0 }
+        .animation(.easeOut(duration: 0.14), value: isHovered)
+        .padding(.top, 6)
     }
 }

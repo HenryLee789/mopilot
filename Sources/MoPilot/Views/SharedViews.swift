@@ -309,6 +309,7 @@ struct SmartModuleTile: View {
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.tertiary)
+                    .offset(x: isHovered && isEnabled ? 3 : 0)
             }
             .padding(14)
             .frame(maxWidth: .infinity, minHeight: 70, alignment: .leading)
@@ -325,6 +326,7 @@ struct SmartModuleTile: View {
         .disabled(!isEnabled)
         .opacity(isEnabled ? 1 : 0.45)
         .scaleEffect(isHovered && isEnabled ? 1.012 : 1)
+        .pointingHandOnHover(isEnabled)
         .animation(.easeOut(duration: 0.16), value: isHovered)
         .onHover { isHovered = $0 }
     }
@@ -499,12 +501,14 @@ struct RunnerCancelButton: View {
     @ObservedObject var runner: CommandRunner
 
     var body: some View {
-        Button {
+        SecondaryHoverButton(
+            title: "取消",
+            systemImage: "xmark.circle",
+            isEnabled: runner.isRunning,
+            accent: MoPilotPalette.rose
+        ) {
             runner.cancel()
-        } label: {
-            Label("取消", systemImage: "xmark.circle")
         }
-        .disabled(!runner.isRunning)
     }
 }
 
@@ -512,11 +516,13 @@ struct CopyLogButton: View {
     let text: String
 
     var body: some View {
-        Button {
+        SecondaryHoverButton(
+            title: "复制日志",
+            systemImage: "doc.on.doc",
+            isEnabled: !text.isEmpty,
+            accent: MoPilotTheme.files.accentColor
+        ) {
             Pasteboard.copy(text)
-        } label: {
-            Label("复制日志", systemImage: "doc.on.doc")
         }
-        .disabled(text.isEmpty)
     }
 }

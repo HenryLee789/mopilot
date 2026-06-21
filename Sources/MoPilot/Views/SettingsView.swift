@@ -16,15 +16,29 @@ struct SettingsView: View {
                 TextField("默认自动检测 which mo", text: $appState.manualMolePath)
                     .textFieldStyle(.roundedBorder)
 
-                HStack {
-                    Button("保存并重新检测") {
+                HStack(spacing: 10) {
+                    SecondaryHoverButton(
+                        title: "保存并重新检测",
+                        systemImage: "checkmark.circle",
+                        accent: MoPilotTheme.settings.accentColor
+                    ) {
                         Task { await appState.refresh() }
                     }
-                    Button("清除手动路径") {
+
+                    SecondaryHoverButton(
+                        title: "清除手动路径",
+                        systemImage: "xmark.circle",
+                        accent: MoPilotPalette.rose
+                    ) {
                         appState.clearManualPath()
                         Task { await appState.refresh() }
                     }
-                    Button("重新检测") {
+
+                    SecondaryHoverButton(
+                        title: "重新检测",
+                        systemImage: "arrow.clockwise",
+                        accent: MoPilotTheme.smartScan.accentColor
+                    ) {
                         Task { await appState.refresh() }
                     }
                 }
@@ -48,8 +62,12 @@ struct SettingsView: View {
 
             ProductCard(title: "日志", systemImage: "doc.text") {
                 InfoRow(label: "保存目录", value: appState.logService.directoryURL.path)
-                HStack {
-                    Button("打开日志目录") {
+                HStack(spacing: 10) {
+                    SecondaryHoverButton(
+                        title: "打开日志目录",
+                        systemImage: "folder",
+                        accent: MoPilotTheme.settings.accentColor
+                    ) {
                         do {
                             try appState.logService.openDirectory()
                             logMessage = "已打开日志目录。"
@@ -57,10 +75,20 @@ struct SettingsView: View {
                             logMessage = "打开失败：\(error.localizedDescription)"
                         }
                     }
-                    Button("复制路径") {
+
+                    SecondaryHoverButton(
+                        title: "复制路径",
+                        systemImage: "doc.on.doc",
+                        accent: MoPilotTheme.files.accentColor
+                    ) {
                         Pasteboard.copy(appState.logService.directoryURL.path)
                     }
-                    Button("复制诊断信息") {
+
+                    SecondaryHoverButton(
+                        title: "复制诊断信息",
+                        systemImage: "stethoscope",
+                        accent: MoPilotTheme.smartScan.accentColor
+                    ) {
                         Pasteboard.copy(diagnosticsText)
                         logMessage = "已复制诊断信息。"
                     }
@@ -76,7 +104,7 @@ struct SettingsView: View {
         let cliVersion = appState.cliStatus.version ?? "unknown"
         return """
         MoPilot Diagnostics
-        App Version: 0.6.0
+        App Version: 0.6.1
         Mole CLI Path: \(cliPath)
         Mole CLI Version: \(cliVersion)
         Analyze Mode: \(appState.capabilities.analyzeModeDescription)
