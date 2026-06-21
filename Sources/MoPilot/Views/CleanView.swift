@@ -8,7 +8,7 @@ struct CleanView: View {
 
     var body: some View {
         CommandPageLayout(
-            title: "Clean 清理缓存",
+            title: "System Junk",
             subtitle: "默认先运行 mo clean --dry-run。确认看过预览后，才允许执行 mo clean。",
             systemImage: "sparkles",
             runner: runner
@@ -44,85 +44,46 @@ struct CleanView: View {
     }
 
     private func cleanScanPanel(moPath: String) -> some View {
-        HStack(spacing: 26) {
-            SmartScannerOrb(
-                systemImage: runner.isRunning ? "magnifyingglass" : runner.hasSuccessfulRun(.cleanDryRun) ? "checkmark.shield" : "sparkles",
-                title: runner.isRunning ? "扫描中" : runner.hasSuccessfulRun(.cleanDryRun) ? "已预览" : "清理",
-                subtitle: runner.isRunning ? "dry-run" : runner.hasSuccessfulRun(.cleanDryRun) ? "可确认" : "安全扫描",
-                isActive: runner.isRunning || !runner.hasSuccessfulRun(.cleanDryRun)
-            )
-            .frame(width: 198, height: 198)
-
-            VStack(alignment: .leading, spacing: 15) {
+        ModernCard(cornerRadius: 24, padding: 24, accent: MoPilotPalette.blue, showsAccentLine: true) {
+            VStack(alignment: .leading, spacing: 18) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(runner.hasSuccessfulRun(.cleanDryRun) ? "预览已完成" : "安全清理扫描")
-                        .font(.title2.weight(.bold))
+                    Text(runner.hasSuccessfulRun(.clean) ? "清理已完成" : runner.hasSuccessfulRun(.cleanDryRun) ? "预览已完成" : "安全清理扫描")
+                        .font(.system(size: 28, weight: .bold))
                     Text(runner.hasSuccessfulRun(.cleanDryRun) ? "你可以查看日志确认范围，再执行真实清理。" : "先运行 dry-run，只预览、不删除。")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
 
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                    scanTile("系统缓存", "sudo 项会提示", "externaldrive.badge.timemachine", MoPilotPalette.blue)
-                    scanTile("应用缓存", "预览后清理", "app.dashed", MoPilotPalette.mint)
-                    scanTile("日志输出", "自动保存", "doc.text", MoPilotPalette.amber)
+                if runner.isRunning {
+                    ProgressCard(
+                        title: "Running dry-run",
+                        detail: "后台调用 mo，日志会实时显示在下方。",
+                        progress: 0.64,
+                        isActive: true,
+                        accent: MoPilotPalette.blue
+                    )
+                }
+
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: 14)], spacing: 14) {
+                    FeatureCard(title: "System Cache", subtitle: "系统缓存范围以 mo 输出为准。", estimate: runner.hasSuccessfulRun(.cleanDryRun) ? "Previewed" : "Pending", status: "Dry-run", systemImage: "internaldrive", accent: MoPilotPalette.blue)
+                    FeatureCard(title: "App Cache", subtitle: "应用缓存预览后才允许清理。", estimate: runner.hasSuccessfulRun(.clean) ? "Cleaned" : "Protected", status: "Confirm", systemImage: "app.dashed", accent: MoPilotPalette.mint)
+                    FeatureCard(title: "Saved Logs", subtitle: "每次命令自动保存日志文件。", estimate: runner.lastLogURL?.lastPathComponent ?? "Auto", status: "Log", systemImage: "doc.text", accent: MoPilotPalette.amber)
                 }
 
                 HStack(spacing: 12) {
-                    SmartActionButton(title: runner.hasSuccessfulRun(.cleanDryRun) ? "重新扫描" : "开始扫描", systemImage: "magnifyingglass") {
+                    PrimaryButton(title: runner.hasSuccessfulRun(.cleanDryRun) ? "重新预览" : "Start Scan", systemImage: "magnifyingglass", isEnabled: !runner.isRunning) {
                         didAutoPreview = true
                         runner.run(.cleanDryRun, moPath: moPath)
                     }
-                    .disabled(runner.isRunning)
 
-                    Button(role: .destructive) {
+                    PrimaryButton(title: "Clean Now", systemImage: "trash", role: .destructive, isEnabled: !runner.isRunning && runner.hasSuccessfulRun(.cleanDryRun)) {
                         showCleanConfirmation = true
-                    } label: {
-                        Label("清理", systemImage: "trash")
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.red)
-                    .disabled(runner.isRunning || !runner.hasSuccessfulRun(.cleanDryRun))
 
                     RunnerCancelButton(runner: runner)
                     CopyLogButton(text: runner.logText)
                 }
             }
         }
-        .padding(22)
-        .background(.regularMaterial)
-        .background(
-            LinearGradient(
-                colors: [
-                    MoPilotPalette.mint.opacity(0.14),
-                    MoPilotPalette.teal.opacity(0.10),
-                    MoPilotPalette.blue.opacity(0.075)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(MoPilotPalette.mint.opacity(0.22), lineWidth: 1)
-        }
-    }
-
-    private func scanTile(_ title: String, _ value: String, _ icon: String, _ accent: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(accent)
-            Text(title)
-                .font(.headline)
-            Text(value)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity, minHeight: 96, alignment: .leading)
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }

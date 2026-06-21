@@ -15,28 +15,39 @@ struct AnalyzeView: View {
 
     var body: some View {
         CommandPageLayout(
-            title: "Analyze 磁盘分析",
-            subtitle: "优先使用 JSON 输出构建列表；当前 CLI 不支持或解析失败时自动回退原始日志。",
-            systemImage: "chart.pie",
+            title: "Large Files",
+            subtitle: "调用 mo analyze 分析空间占用。支持 JSON 时展示表格，否则自动回退原始日志。",
+            systemImage: "folder",
             runner: runner
         ) {
             if let moPath = appState.cliStatus.path {
-                ProductCard(title: "分析控制台", systemImage: "chart.pie") {
-                    Text(appState.capabilities.analyzeModeDescription)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-
-                    HStack {
-                        Button {
-                            runAnalyze(moPath: moPath)
-                        } label: {
-                            Label("执行分析", systemImage: "chart.pie")
+                ModernCard(cornerRadius: 24, padding: 24, accent: MoPilotPalette.teal, showsAccentLine: true) {
+                    VStack(alignment: .leading, spacing: 18) {
+                        HStack(alignment: .top, spacing: 16) {
+                            IconBadge(systemImage: "folder", accent: MoPilotPalette.teal)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Find space-heavy folders")
+                                    .font(.system(size: 26, weight: .bold))
+                                Text(appState.capabilities.analyzeModeDescription)
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            StatusTag(title: parsedItems.isEmpty ? "Raw Log" : "\(parsedItems.count) Items", accent: MoPilotPalette.teal)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(runner.isRunning)
 
-                        RunnerCancelButton(runner: runner)
-                        CopyLogButton(text: runner.logText)
+                        if runner.isRunning {
+                            ProgressCard(title: "Analyzing disk usage", detail: "mo analyze 正在后台执行。", progress: 0.58, isActive: true, accent: MoPilotPalette.teal)
+                        }
+
+                        HStack(spacing: 12) {
+                            PrimaryButton(title: "Run Analyze", systemImage: "chart.pie", isEnabled: !runner.isRunning) {
+                                runAnalyze(moPath: moPath)
+                            }
+
+                            RunnerCancelButton(runner: runner)
+                            CopyLogButton(text: runner.logText)
+                        }
                     }
                 }
 

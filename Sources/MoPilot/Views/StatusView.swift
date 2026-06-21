@@ -12,28 +12,39 @@ struct StatusView: View {
 
     var body: some View {
         CommandPageLayout(
-            title: "Status 系统状态",
+            title: "System Status",
             subtitle: "优先使用 JSON 输出构建状态卡片；当前 CLI 不支持或解析失败时自动回退原始日志。",
             systemImage: "waveform.path.ecg",
             runner: runner
         ) {
             if let moPath = appState.cliStatus.path {
-                ProductCard(title: "状态控制台", systemImage: "waveform.path.ecg") {
-                    Text(appState.capabilities.statusModeDescription)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-
-                    HStack {
-                        Button {
-                            runStatus(moPath: moPath)
-                        } label: {
-                            Label("刷新状态", systemImage: "waveform.path.ecg")
+                ModernCard(cornerRadius: 24, padding: 24, accent: MoPilotPalette.violet, showsAccentLine: true) {
+                    VStack(alignment: .leading, spacing: 18) {
+                        HStack(alignment: .top, spacing: 16) {
+                            IconBadge(systemImage: "waveform.path.ecg", accent: MoPilotPalette.violet)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Live system snapshot")
+                                    .font(.system(size: 26, weight: .bold))
+                                Text(appState.capabilities.statusModeDescription)
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            StatusTag(title: parsedStatus?.metrics.isEmpty == false ? "Cards" : "Raw Log", accent: MoPilotPalette.violet)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(runner.isRunning)
 
-                        RunnerCancelButton(runner: runner)
-                        CopyLogButton(text: runner.logText)
+                        if runner.isRunning {
+                            ProgressCard(title: "Refreshing status", detail: "后台调用 mo status。", progress: 0.62, isActive: true, accent: MoPilotPalette.violet)
+                        }
+
+                        HStack(spacing: 12) {
+                            PrimaryButton(title: "Refresh Status", systemImage: "arrow.clockwise", isEnabled: !runner.isRunning) {
+                                runStatus(moPath: moPath)
+                            }
+
+                            RunnerCancelButton(runner: runner)
+                            CopyLogButton(text: runner.logText)
+                        }
                     }
                 }
 

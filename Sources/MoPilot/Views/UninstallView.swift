@@ -18,9 +18,9 @@ struct UninstallView: View {
 
     var body: some View {
         CommandPageLayout(
-            title: "Uninstall 应用卸载",
+            title: "Uninstaller",
             subtitle: "在图形界面中选择应用，先 dry-run 预览，再确认后台调用 mo uninstall 完成卸载。默认移入废纸篓，不使用永久删除。",
-            systemImage: "trash",
+            systemImage: "app.badge",
             runner: runner
         ) {
             VStack(alignment: .leading, spacing: 14) {
@@ -100,23 +100,14 @@ struct UninstallView: View {
                     .disabled(isLoadingApps || runner.isRunning)
                 }
 
-                HStack {
-                    Button {
+                HStack(spacing: 12) {
+                    PrimaryButton(title: "Preview Selection", systemImage: "doc.text.magnifyingglass", isEnabled: !selectedNames.isEmpty && !runner.isRunning) {
                         runPreview(moPath: moPath)
-                    } label: {
-                        Label("预览选中应用", systemImage: "doc.text.magnifyingglass")
                     }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(selectedNames.isEmpty || runner.isRunning)
 
-                    Button {
+                    PrimaryButton(title: "Uninstall", systemImage: "trash", role: .destructive, isEnabled: canUninstallSelected && !runner.isRunning) {
                         showUninstallConfirmation = true
-                    } label: {
-                        Label("卸载选中应用", systemImage: "trash")
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.red)
-                    .disabled(!canUninstallSelected || runner.isRunning)
 
                     RunnerCancelButton(runner: runner)
                     CopyLogButton(text: runner.logText)
@@ -322,9 +313,9 @@ private struct UninstallAppRow: View {
                     endPoint: .bottomTrailing
                 )
             )
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .stroke(rowStrokeColor, lineWidth: 1)
             }
         }

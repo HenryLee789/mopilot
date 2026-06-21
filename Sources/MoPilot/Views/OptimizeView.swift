@@ -7,38 +7,52 @@ struct OptimizeView: View {
 
     var body: some View {
         CommandPageLayout(
-            title: "Optimize 系统优化",
-            subtitle: "默认先运行 mo optimize --dry-run。执行优化前必须再次确认。",
-            systemImage: "slider.horizontal.3",
+            title: "Privacy",
+            subtitle: "当前入口调用 mo optimize --dry-run 做安全预览；真实执行前必须再次确认。",
+            systemImage: "hand.raised",
             runner: runner
         ) {
-            ProductCard(title: "优化预览", systemImage: "slider.horizontal.3") {
-                Text("系统优化可能影响系统设置或服务行为。请先查看 dry-run 输出，再决定是否执行。")
-                    .foregroundStyle(.secondary)
-
-                if let moPath = appState.cliStatus.path {
-                    HStack {
-                        Button {
-                            runner.run(.optimizeDryRun, moPath: moPath)
-                        } label: {
-                            Label("预览优化", systemImage: "doc.text.magnifyingglass")
+            ModernCard(cornerRadius: 24, padding: 24, accent: MoPilotPalette.violet, showsAccentLine: true) {
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack(alignment: .top, spacing: 16) {
+                        IconBadge(systemImage: "hand.raised", accent: MoPilotPalette.violet)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Privacy and safety review")
+                                .font(.system(size: 26, weight: .bold))
+                            Text("此页面不新增额外隐私清理逻辑，只展示并执行本机 mo optimize 的 dry-run/确认流程。")
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
-                        .disabled(runner.isRunning)
-
-                        Button {
-                            showOptimizeConfirmation = true
-                        } label: {
-                            Label("执行优化", systemImage: "slider.horizontal.3")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.orange)
-                        .disabled(runner.isRunning || !runner.hasSuccessfulRun(.optimizeDryRun))
-
-                        RunnerCancelButton(runner: runner)
-                        CopyLogButton(text: runner.logText)
+                        Spacer()
+                        StatusTag(title: runner.hasSuccessfulRun(.optimizeDryRun) ? "Previewed" : "Dry-run first", accent: MoPilotPalette.violet)
                     }
-                } else {
-                    CLIUnavailableView(message: missingMessage)
+
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 190), spacing: 14)], spacing: 14) {
+                        FeatureCard(title: "Safety Preview", subtitle: "先查看 mo 输出，不直接修改系统。", estimate: runner.hasSuccessfulRun(.optimizeDryRun) ? "Ready" : "Required", status: "Dry-run", systemImage: "doc.text.magnifyingglass", accent: MoPilotPalette.blue)
+                        FeatureCard(title: "Confirmation", subtitle: "真实执行前弹出确认窗口。", estimate: "Manual", status: "Protected", systemImage: "lock.shield", accent: MoPilotPalette.amber)
+                    }
+
+                    if runner.isRunning {
+                        ProgressCard(title: "Running optimize preview", detail: "后台调用 mo optimize。", progress: 0.56, isActive: true, accent: MoPilotPalette.violet)
+                    }
+
+                    if let moPath = appState.cliStatus.path {
+                        HStack(spacing: 12) {
+                            PrimaryButton(title: "Preview", systemImage: "doc.text.magnifyingglass", isEnabled: !runner.isRunning) {
+                                runner.run(.optimizeDryRun, moPath: moPath)
+                            }
+
+                            PrimaryButton(title: "Apply", systemImage: "slider.horizontal.3", role: .destructive, isEnabled: !runner.isRunning && runner.hasSuccessfulRun(.optimizeDryRun)) {
+                                showOptimizeConfirmation = true
+                            }
+
+                            RunnerCancelButton(runner: runner)
+                            CopyLogButton(text: runner.logText)
+                        }
+                    } else {
+                        CLIUnavailableView(message: missingMessage)
+                    }
                 }
             }
         }

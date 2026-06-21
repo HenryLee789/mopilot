@@ -1,68 +1,43 @@
 import SwiftUI
 
 struct SidebarView: View {
-    @Binding var selection: AppSection
+    @Binding var selection: AppSection?
     let cliInstalled: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            brandHeader
-
-            VStack(alignment: .leading, spacing: 12) {
-                sidebarGroup("智能维护", sections: [.dashboard])
-                sidebarGroup("清理", sections: [.clean, .analyze])
-                sidebarGroup("应用", sections: [.uninstall])
-                sidebarGroup("性能", sections: [.optimize, .status])
-                sidebarGroup("系统", sections: [.settings])
+        List(selection: $selection) {
+            Section {
+                ForEach(AppSection.sidebarSections) { section in
+                    SidebarItem(
+                        section: section,
+                        isSelected: selection == section,
+                        isEnabled: isEnabled(section)
+                    )
+                    .tag(section)
+                    .disabled(!isEnabled(section))
+                }
+            } header: {
+                brandHeader
             }
-
-            Spacer()
-
-            VStack(alignment: .leading, spacing: 6) {
-                Label(cliInstalled ? "Mole CLI 已连接" : "Mole CLI 未检测到", systemImage: cliInstalled ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(cliInstalled ? MoPilotPalette.mint : MoPilotPalette.amber)
-                Text("MoPilot 只调用本机 mo")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.thinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 18)
-        .frame(width: 240)
-        .background(
-            LinearGradient(
-                colors: [
-                    Color.black.opacity(0.18),
-                    MoPilotPalette.violet.opacity(0.12),
-                    MoPilotPalette.teal.opacity(0.07)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .overlay(alignment: .trailing) {
-            Rectangle()
-                .fill(.white.opacity(0.08))
-                .frame(width: 1)
+        .listStyle(.sidebar)
+        .navigationSplitViewColumnWidth(min: 220, ideal: 248, max: 280)
+        .safeAreaInset(edge: .bottom) {
+            cliStatusFooter
         }
     }
 
     private var brandHeader: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(MoPilotPalette.smartGradient)
                 Image(systemName: "sparkles")
                     .font(.headline.weight(.bold))
                     .foregroundStyle(.white)
             }
-            .frame(width: 38, height: 38)
-            .shadow(color: MoPilotPalette.blue.opacity(0.16), radius: 8, y: 5)
+            .frame(width: 36, height: 36)
+            .shadow(color: MoPilotPalette.blue.opacity(0.18), radius: 8, y: 5)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("MoPilot")
@@ -72,71 +47,29 @@ struct SidebarView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(.top, 8)
-        .padding(.bottom, 4)
+        .textCase(nil)
+        .padding(.vertical, 10)
     }
 
-    private func sidebarGroup(_ title: String, sections: [AppSection]) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
+    private var cliStatusFooter: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(cliInstalled ? "Mole CLI 已连接" : "未检测到 mo", systemImage: cliInstalled ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                 .font(.caption.weight(.semibold))
+                .foregroundStyle(cliInstalled ? MoPilotPalette.mint : MoPilotPalette.amber)
+            Text("非官方 GUI，只调用本机 Mole CLI。")
+                .font(.caption2)
                 .foregroundStyle(.secondary)
-                .padding(.horizontal, 10)
-
-            ForEach(sections) { section in
-                sidebarRow(section)
-            }
+                .fixedSize(horizontal: false, vertical: true)
         }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 
-    private func sidebarRow(_ section: AppSection) -> some View {
-        Button {
-            selection = section
-        } label: {
-            HStack(spacing: 11) {
-                Image(systemName: section.systemImage)
-                    .font(.system(size: 15, weight: .semibold))
-                    .frame(width: 20)
-                    .foregroundStyle(selection == section ? .white : sectionAccent(section))
-
-                Text(section.shortTitle)
-                    .font(.callout.weight(.semibold))
-                    .lineLimit(1)
-
-                Spacer()
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
-            .background {
-                if selection == section {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(sectionAccent(section).gradient)
-                        .shadow(color: sectionAccent(section).opacity(0.22), radius: 12, x: 0, y: 6)
-                }
-            }
-        }
-        .buttonStyle(.plain)
-        .disabled(!cliInstalled && section != .settings && section != .dashboard)
-        .opacity((cliInstalled || section == .settings || section == .dashboard) ? 1 : 0.45)
-    }
-
-    private func sectionAccent(_ section: AppSection) -> Color {
-        switch section {
-        case .dashboard:
-            return MoPilotPalette.blue
-        case .clean:
-            return MoPilotPalette.mint
-        case .analyze:
-            return MoPilotPalette.teal
-        case .uninstall:
-            return MoPilotPalette.rose
-        case .optimize:
-            return MoPilotPalette.amber
-        case .status:
-            return MoPilotPalette.violet
-        case .settings:
-            return .secondary
-        }
+    private func isEnabled(_ section: AppSection) -> Bool {
+        cliInstalled || section == .dashboard || section == .settings
     }
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.5.0
+
+- Rebuilt the visible UI around a modern macOS card-based utility layout.
+- Switched the root shell back to `NavigationSplitView` with the requested sidebar entries: Dashboard, System Junk, Large Files, Uninstaller, Privacy, and Settings.
+- Added reusable UI components: `SidebarItem`, `FeatureCard`, `StatusCard`, `PrimaryButton`, and `ProgressCard`.
+- Reworked Dashboard with a large scan status card, progress state, safe dry-run scanning, confirmation before cleaning, and four cleanup module cards.
+- Restyled System Junk, Large Files, Uninstaller, Privacy, Status, logs, and shared cards with consistent rounded corners, shadows, icon badges, status tags, and adaptive light/dark colors.
+- Added a direct `swiftc` fallback and ad-hoc signing step to `build.sh` for local environments where SwiftPM is blocked by Xcode license state.
+- Updated app bundle metadata to version `0.5.0`.
+
 ## v0.4.2
 
 - Updated DMG packaging so the mounted installer shows `MoPilot.app` and an `Applications` shortcut side by side.

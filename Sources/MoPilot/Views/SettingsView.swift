@@ -76,7 +76,7 @@ struct SettingsView: View {
         let cliVersion = appState.cliStatus.version ?? "unknown"
         return """
         MoPilot Diagnostics
-        App Version: 0.4.2
+        App Version: 0.5.0
         Mole CLI Path: \(cliPath)
         Mole CLI Version: \(cliVersion)
         Analyze Mode: \(appState.capabilities.analyzeModeDescription)

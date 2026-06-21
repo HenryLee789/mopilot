@@ -44,7 +44,7 @@ enum MoPilotPalette {
 }
 
 struct MoPilotPage<Content: View>: View {
-    var maxWidth: CGFloat = 1060
+    var maxWidth: CGFloat = 1120
     @ViewBuilder let content: Content
 
     var body: some View {
@@ -53,11 +53,11 @@ struct MoPilotPage<Content: View>: View {
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 20) {
                     content
                 }
-                .padding(.horizontal, 28)
-                .padding(.vertical, 24)
+                .padding(.horizontal, 30)
+                .padding(.vertical, 28)
                 .frame(maxWidth: maxWidth, alignment: .leading)
             }
         }
@@ -70,18 +70,16 @@ struct MoPilotBackground: View {
             LinearGradient(
                 colors: [
                     Color(nsColor: .windowBackgroundColor),
-                    MoPilotPalette.violet.opacity(0.055),
-                    MoPilotPalette.mint.opacity(0.055),
-                    MoPilotPalette.blue.opacity(0.04),
-                    MoPilotPalette.magenta.opacity(0.028),
-                    MoPilotPalette.amber.opacity(0.02)
+                    MoPilotPalette.blue.opacity(0.055),
+                    MoPilotPalette.violet.opacity(0.045),
+                    MoPilotPalette.mint.opacity(0.030)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
 
             ScanLineField()
-                .opacity(0.24)
+                .opacity(0.10)
         }
     }
 }
@@ -128,14 +126,14 @@ struct PageHeader: View {
     var systemImage: String = "wrench.and.screwdriver"
 
     var body: some View {
-        HStack(alignment: .center, spacing: 16) {
-            AnimatedScanRing(systemImage: systemImage, isActive: true)
-                .frame(width: 60, height: 60)
+        HStack(alignment: .center, spacing: 14) {
+            IconBadge(systemImage: systemImage, accent: MoPilotPalette.blue)
+                .frame(width: 52, height: 52)
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 10) {
                     Text(title)
-                        .font(.title.weight(.bold))
+                        .font(.system(size: 30, weight: .bold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
 
@@ -346,29 +344,7 @@ struct SmartActionButton: View {
     @State private var isHovered = false
 
     var body: some View {
-        Button(role: role, action: action) {
-            Label(title, systemImage: systemImage)
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 22)
-                .padding(.vertical, 11)
-                .frame(minWidth: 152)
-                .background(
-                    LinearGradient(
-                        colors: role == .destructive
-                            ? [MoPilotPalette.rose, MoPilotPalette.amber.opacity(0.9)]
-                            : [MoPilotPalette.violet, MoPilotPalette.blue, MoPilotPalette.teal],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .clipShape(Capsule())
-                .shadow(color: MoPilotPalette.blue.opacity(isHovered ? 0.28 : 0.14), radius: isHovered ? 18 : 10, x: 0, y: 8)
-        }
-        .buttonStyle(.plain)
-        .scaleEffect(isHovered ? 1.025 : 1)
-        .animation(.easeOut(duration: 0.16), value: isHovered)
-        .onHover { isHovered = $0 }
+        PrimaryButton(title: title, systemImage: systemImage, role: role, action: action)
     }
 }
 
@@ -414,7 +390,7 @@ struct CommandPageLayout<Controls: View>: View {
     @ViewBuilder let controls: Controls
 
     var body: some View {
-        MoPilotPage {
+        MoPilotPage(maxWidth: 1140) {
             PageHeader(title: title, subtitle: subtitle, systemImage: systemImage)
             controls
             CommandStatusStrip(runner: runner)
@@ -429,36 +405,29 @@ struct CommandStatusStrip: View {
     @ObservedObject var runner: CommandRunner
 
     var body: some View {
-        HStack(spacing: 14) {
-            AnimatedStatusDot(isRunning: runner.isRunning)
+        ModernCard(cornerRadius: 18, padding: 16, accent: MoPilotPalette.blue, showsAccentLine: true) {
+            HStack(spacing: 14) {
+                AnimatedStatusDot(isRunning: runner.isRunning)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("状态：\(runner.status.label)")
-                    .font(.headline)
-                Text(statusDetail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("状态：\(runner.status.label)")
+                        .font(.headline)
+                    Text(statusDetail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
 
-            Spacer()
+                Spacer()
 
-            if let lastLogURL = runner.lastLogURL {
-                Label(lastLogURL.lastPathComponent, systemImage: "doc.text")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
+                if let lastLogURL = runner.lastLogURL {
+                    Label(lastLogURL.lastPathComponent, systemImage: "doc.text")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
             }
         }
-        .padding(14)
-        .background(.ultraThinMaterial)
-        .background(MoPilotPalette.cardGradient)
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(.white.opacity(0.18), lineWidth: 1)
-        }
-        .shadow(color: Color.black.opacity(0.08), radius: 16, x: 0, y: 8)
     }
 
     private var statusDetail: String {
@@ -498,16 +467,13 @@ struct MetricCard: View {
     let metric: StatusMetric
 
     var body: some View {
-        ProductCard(title: metric.title, systemImage: metric.systemImage) {
-            Text(metric.value)
-                .font(.title2.weight(.bold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
-            Text(metric.detail)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
-        }
+        StatusCard(
+            title: metric.title,
+            value: metric.value,
+            subtitle: metric.detail,
+            systemImage: metric.systemImage,
+            accent: MoPilotPalette.teal
+        )
         .frame(minHeight: 128)
     }
 }
@@ -519,42 +485,18 @@ struct ProductCard<Content: View>: View {
     @State private var isHovered = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 9) {
-                Image(systemName: systemImage)
-                    .font(.headline)
-                    .foregroundStyle(MoPilotPalette.teal)
-                    .frame(width: 22)
-                Text(title)
-                    .font(.headline)
-                Spacer()
+        ModernCard(cornerRadius: 20, padding: 18, accent: MoPilotPalette.teal, showsAccentLine: true) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 10) {
+                    IconBadge(systemImage: systemImage, accent: MoPilotPalette.teal)
+                        .frame(width: 34, height: 34)
+                    Text(title)
+                        .font(.headline.weight(.semibold))
+                    Spacer()
+                }
+                content
             }
-            content
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial)
-        .background(MoPilotPalette.cardGradient.opacity(isHovered ? 1 : 0.72))
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(isHovered ? 0.34 : 0.18),
-                            MoPilotPalette.teal.opacity(isHovered ? 0.38 : 0.16),
-                            Color.secondary.opacity(0.08)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
-        }
-        .shadow(color: Color.black.opacity(isHovered ? 0.12 : 0.075), radius: isHovered ? 18 : 12, x: 0, y: isHovered ? 10 : 6)
-        .scaleEffect(isHovered ? 1.004 : 1)
-        .animation(.easeOut(duration: 0.18), value: isHovered)
-        .onHover { isHovered = $0 }
     }
 }
 

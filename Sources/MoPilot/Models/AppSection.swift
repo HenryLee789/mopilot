@@ -11,37 +11,41 @@ enum AppSection: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    static var sidebarSections: [AppSection] {
+        [.dashboard, .clean, .analyze, .uninstall, .optimize, .settings]
+    }
+
     var title: String {
         switch self {
         case .dashboard:
             "Dashboard"
         case .clean:
-            "Clean 清理"
+            "System Junk"
         case .analyze:
-            "Analyze 分析"
+            "Large Files"
         case .uninstall:
-            "Uninstall 卸载"
+            "Uninstaller"
         case .optimize:
-            "Optimize 优化"
+            "Privacy"
         case .status:
-            "Status 状态"
+            "System Status"
         case .settings:
-            "Settings 设置"
+            "Settings"
         }
     }
 
     var shortTitle: String {
         switch self {
         case .dashboard:
-            "Smart Care"
+            "Dashboard"
         case .clean:
-            "Clean"
+            "System Junk"
         case .analyze:
-            "Analyze"
+            "Large Files"
         case .uninstall:
-            "Uninstall"
+            "Uninstaller"
         case .optimize:
-            "Optimize"
+            "Privacy"
         case .status:
             "Status"
         case .settings:
@@ -52,15 +56,15 @@ enum AppSection: String, CaseIterable, Identifiable {
     var sidebarSubtitle: String {
         switch self {
         case .dashboard:
-            "总览与扫描入口"
+            "总览与扫描"
         case .clean:
-            "缓存 dry-run"
+            "缓存与系统垃圾"
         case .analyze:
-            "空间占用"
+            "空间占用分析"
         case .uninstall:
-            "应用与残留"
+            "应用卸载预览"
         case .optimize:
-            "系统优化"
+            "安全预览保护"
         case .status:
             "性能状态"
         case .settings:
@@ -71,15 +75,15 @@ enum AppSection: String, CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .dashboard:
-            "rectangle.grid.2x2"
+            "gauge"
         case .clean:
             "sparkles"
         case .analyze:
-            "chart.pie"
+            "folder"
         case .uninstall:
-            "trash"
+            "app.badge"
         case .optimize:
-            "slider.horizontal.3"
+            "hand.raised"
         case .status:
             "waveform.path.ecg"
         case .settings:

@@ -17,18 +17,18 @@ struct LogOutputView: View {
             .background(
                 LinearGradient(
                     colors: [
-                        Color.black.opacity(0.10),
-                        MoPilotPalette.teal.opacity(0.055),
-                        Color.black.opacity(0.055)
+                        Color(nsColor: .textBackgroundColor).opacity(0.62),
+                        MoPilotPalette.blue.opacity(0.045),
+                        MoPilotPalette.violet.opacity(0.035)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
             )
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(MoPilotPalette.teal.opacity(0.16), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(MoPilotPalette.blue.opacity(0.16), lineWidth: 1)
             }
             .onChange(of: text) { _ in
                 withAnimation(.easeOut(duration: 0.15)) {
