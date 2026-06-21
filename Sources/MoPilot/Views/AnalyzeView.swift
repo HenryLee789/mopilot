@@ -18,13 +18,14 @@ struct AnalyzeView: View {
             title: "Large Files",
             subtitle: "调用 mo analyze 分析空间占用。支持 JSON 时展示表格，否则自动回退原始日志。",
             systemImage: "folder",
+            theme: .files,
             runner: runner
         ) {
             if let moPath = appState.cliStatus.path {
-                ModernCard(cornerRadius: 24, padding: 24, accent: MoPilotPalette.teal, showsAccentLine: true) {
+                ModernCard(cornerRadius: 28, padding: 24, accent: MoPilotTheme.files.accentColor, showsAccentLine: true) {
                     VStack(alignment: .leading, spacing: 18) {
                         HStack(alignment: .top, spacing: 16) {
-                            IconBadge(systemImage: "folder", accent: MoPilotPalette.teal)
+                            IconBadge(systemImage: "folder", accent: MoPilotTheme.files.accentColor)
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Find space-heavy folders")
                                     .font(.system(size: 26, weight: .bold))
@@ -33,15 +34,15 @@ struct AnalyzeView: View {
                                     .foregroundStyle(.secondary)
                             }
                             Spacer()
-                            StatusTag(title: parsedItems.isEmpty ? "Raw Log" : "\(parsedItems.count) Items", accent: MoPilotPalette.teal)
+                            StatusTag(title: parsedItems.isEmpty ? "Raw Log" : "\(parsedItems.count) Items", accent: MoPilotTheme.files.accentColor)
                         }
 
                         if runner.isRunning {
-                            ProgressCard(title: "Analyzing disk usage", detail: "mo analyze 正在后台执行。", progress: 0.58, isActive: true, accent: MoPilotPalette.teal)
+                            ProgressCard(title: "Analyzing disk usage", detail: "mo analyze 正在后台执行。", progress: 0.58, isActive: true, accent: MoPilotTheme.files.accentColor)
                         }
 
                         HStack(spacing: 12) {
-                            PrimaryButton(title: "Run Analyze", systemImage: "chart.pie", isEnabled: !runner.isRunning) {
+                            PrimaryButton(title: "Run Analyze", systemImage: "chart.pie", isEnabled: !runner.isRunning, theme: .files) {
                                 runAnalyze(moPath: moPath)
                             }
 

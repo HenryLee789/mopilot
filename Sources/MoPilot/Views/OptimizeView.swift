@@ -10,12 +10,13 @@ struct OptimizeView: View {
             title: "Privacy",
             subtitle: "当前入口调用 mo optimize --dry-run 做安全预览；真实执行前必须再次确认。",
             systemImage: "hand.raised",
+            theme: .protection,
             runner: runner
         ) {
-            ModernCard(cornerRadius: 24, padding: 24, accent: MoPilotPalette.violet, showsAccentLine: true) {
+            ModernCard(cornerRadius: 28, padding: 24, accent: MoPilotTheme.protection.accentColor, showsAccentLine: true) {
                 VStack(alignment: .leading, spacing: 18) {
                     HStack(alignment: .top, spacing: 16) {
-                        IconBadge(systemImage: "hand.raised", accent: MoPilotPalette.violet)
+                        IconBadge(systemImage: "hand.raised", accent: MoPilotTheme.protection.accentColor)
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Privacy and safety review")
                                 .font(.system(size: 26, weight: .bold))
@@ -25,25 +26,25 @@ struct OptimizeView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         Spacer()
-                        StatusTag(title: runner.hasSuccessfulRun(.optimizeDryRun) ? "Previewed" : "Dry-run first", accent: MoPilotPalette.violet)
+                        StatusTag(title: runner.hasSuccessfulRun(.optimizeDryRun) ? "Previewed" : "Dry-run first", accent: MoPilotTheme.protection.accentColor)
                     }
 
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 190), spacing: 14)], spacing: 14) {
-                        FeatureCard(title: "Safety Preview", subtitle: "先查看 mo 输出，不直接修改系统。", estimate: runner.hasSuccessfulRun(.optimizeDryRun) ? "Ready" : "Required", status: "Dry-run", systemImage: "doc.text.magnifyingglass", accent: MoPilotPalette.blue)
+                        FeatureCard(title: "Safety Preview", subtitle: "先查看 mo 输出，不直接修改系统。", estimate: runner.hasSuccessfulRun(.optimizeDryRun) ? "Ready" : "Required", status: "Dry-run", systemImage: "doc.text.magnifyingglass", accent: MoPilotTheme.protection.accentColor)
                         FeatureCard(title: "Confirmation", subtitle: "真实执行前弹出确认窗口。", estimate: "Manual", status: "Protected", systemImage: "lock.shield", accent: MoPilotPalette.amber)
                     }
 
                     if runner.isRunning {
-                        ProgressCard(title: "Running optimize preview", detail: "后台调用 mo optimize。", progress: 0.56, isActive: true, accent: MoPilotPalette.violet)
+                        ProgressCard(title: "Running optimize preview", detail: "后台调用 mo optimize。", progress: 0.56, isActive: true, accent: MoPilotTheme.protection.accentColor)
                     }
 
                     if let moPath = appState.cliStatus.path {
                         HStack(spacing: 12) {
-                            PrimaryButton(title: "Preview", systemImage: "doc.text.magnifyingglass", isEnabled: !runner.isRunning) {
+                            PrimaryButton(title: "Preview", systemImage: "doc.text.magnifyingglass", isEnabled: !runner.isRunning, theme: .protection) {
                                 runner.run(.optimizeDryRun, moPath: moPath)
                             }
 
-                            PrimaryButton(title: "Apply", systemImage: "slider.horizontal.3", role: .destructive, isEnabled: !runner.isRunning && runner.hasSuccessfulRun(.optimizeDryRun)) {
+                            PrimaryButton(title: "Apply", systemImage: "slider.horizontal.3", role: .destructive, isEnabled: !runner.isRunning && runner.hasSuccessfulRun(.optimizeDryRun), theme: .protection) {
                                 showOptimizeConfirmation = true
                             }
 

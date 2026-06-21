@@ -11,6 +11,7 @@ struct CleanView: View {
             title: "System Junk",
             subtitle: "默认先运行 mo clean --dry-run。确认看过预览后，才允许执行 mo clean。",
             systemImage: "sparkles",
+            theme: .cleanup,
             runner: runner
         ) {
             if let moPath = appState.cliStatus.path {
@@ -44,7 +45,7 @@ struct CleanView: View {
     }
 
     private func cleanScanPanel(moPath: String) -> some View {
-        ModernCard(cornerRadius: 24, padding: 24, accent: MoPilotPalette.blue, showsAccentLine: true) {
+        ModernCard(cornerRadius: 28, padding: 24, accent: MoPilotTheme.cleanup.accentColor, showsAccentLine: true) {
             VStack(alignment: .leading, spacing: 18) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(runner.hasSuccessfulRun(.clean) ? "清理已完成" : runner.hasSuccessfulRun(.cleanDryRun) ? "预览已完成" : "安全清理扫描")
@@ -60,23 +61,23 @@ struct CleanView: View {
                         detail: "后台调用 mo，日志会实时显示在下方。",
                         progress: 0.64,
                         isActive: true,
-                        accent: MoPilotPalette.blue
+                        accent: MoPilotTheme.cleanup.accentColor
                     )
                 }
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: 14)], spacing: 14) {
-                    FeatureCard(title: "System Cache", subtitle: "系统缓存范围以 mo 输出为准。", estimate: runner.hasSuccessfulRun(.cleanDryRun) ? "Previewed" : "Pending", status: "Dry-run", systemImage: "internaldrive", accent: MoPilotPalette.blue)
-                    FeatureCard(title: "App Cache", subtitle: "应用缓存预览后才允许清理。", estimate: runner.hasSuccessfulRun(.clean) ? "Cleaned" : "Protected", status: "Confirm", systemImage: "app.dashed", accent: MoPilotPalette.mint)
+                    FeatureCard(title: "System Cache", subtitle: "系统缓存范围以 mo 输出为准。", estimate: runner.hasSuccessfulRun(.cleanDryRun) ? "Previewed" : "Pending", status: "Dry-run", systemImage: "internaldrive", accent: MoPilotTheme.cleanup.accentColor)
+                    FeatureCard(title: "App Cache", subtitle: "应用缓存预览后才允许清理。", estimate: runner.hasSuccessfulRun(.clean) ? "Cleaned" : "Protected", status: "Confirm", systemImage: "app.dashed", accent: MoPilotTheme.cleanup.accentColor)
                     FeatureCard(title: "Saved Logs", subtitle: "每次命令自动保存日志文件。", estimate: runner.lastLogURL?.lastPathComponent ?? "Auto", status: "Log", systemImage: "doc.text", accent: MoPilotPalette.amber)
                 }
 
                 HStack(spacing: 12) {
-                    PrimaryButton(title: runner.hasSuccessfulRun(.cleanDryRun) ? "重新预览" : "Start Scan", systemImage: "magnifyingglass", isEnabled: !runner.isRunning) {
+                    PrimaryButton(title: runner.hasSuccessfulRun(.cleanDryRun) ? "重新预览" : "Start Scan", systemImage: "magnifyingglass", isEnabled: !runner.isRunning, theme: .cleanup) {
                         didAutoPreview = true
                         runner.run(.cleanDryRun, moPath: moPath)
                     }
 
-                    PrimaryButton(title: "Clean Now", systemImage: "trash", role: .destructive, isEnabled: !runner.isRunning && runner.hasSuccessfulRun(.cleanDryRun)) {
+                    PrimaryButton(title: "Clean Now", systemImage: "trash", role: .destructive, isEnabled: !runner.isRunning && runner.hasSuccessfulRun(.cleanDryRun), theme: .cleanup) {
                         showCleanConfirmation = true
                     }
 

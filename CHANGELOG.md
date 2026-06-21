@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.6.0
+
+- Reworked the UI layer with Mac Sai-inspired SwiftUI structure and visual patterns while preserving MoPilot's own Mole CLI wrapper logic.
+- Added adapted superellipse cards/buttons, module theme gradients, scan button/progress ring patterns, grouped sidebar structure, result pills, and themed module backgrounds.
+- Updated Dashboard to a Mac Sai-style scan state layout with a large scan control, result pills, status cards, and category cards.
+- Applied themed shells to System Junk, Large Files, Uninstaller, Privacy, System Status, and Settings.
+- Added `THIRD_PARTY_NOTICES.md` with the Mac Sai BSD 3-Clause copyright notice and license text.
+- Updated app bundle metadata to version `0.6.0`.
+
 ## v0.5.0
 
 - Rebuilt the visible UI around a modern macOS card-based utility layout.

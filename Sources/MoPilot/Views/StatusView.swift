@@ -15,13 +15,14 @@ struct StatusView: View {
             title: "System Status",
             subtitle: "优先使用 JSON 输出构建状态卡片；当前 CLI 不支持或解析失败时自动回退原始日志。",
             systemImage: "waveform.path.ecg",
+            theme: .smartScan,
             runner: runner
         ) {
             if let moPath = appState.cliStatus.path {
-                ModernCard(cornerRadius: 24, padding: 24, accent: MoPilotPalette.violet, showsAccentLine: true) {
+                ModernCard(cornerRadius: 28, padding: 24, accent: MoPilotTheme.smartScan.accentColor, showsAccentLine: true) {
                     VStack(alignment: .leading, spacing: 18) {
                         HStack(alignment: .top, spacing: 16) {
-                            IconBadge(systemImage: "waveform.path.ecg", accent: MoPilotPalette.violet)
+                            IconBadge(systemImage: "waveform.path.ecg", accent: MoPilotTheme.smartScan.accentColor)
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Live system snapshot")
                                     .font(.system(size: 26, weight: .bold))
@@ -30,15 +31,15 @@ struct StatusView: View {
                                     .foregroundStyle(.secondary)
                             }
                             Spacer()
-                            StatusTag(title: parsedStatus?.metrics.isEmpty == false ? "Cards" : "Raw Log", accent: MoPilotPalette.violet)
+                            StatusTag(title: parsedStatus?.metrics.isEmpty == false ? "Cards" : "Raw Log", accent: MoPilotTheme.smartScan.accentColor)
                         }
 
                         if runner.isRunning {
-                            ProgressCard(title: "Refreshing status", detail: "后台调用 mo status。", progress: 0.62, isActive: true, accent: MoPilotPalette.violet)
+                            ProgressCard(title: "Refreshing status", detail: "后台调用 mo status。", progress: 0.62, isActive: true, accent: MoPilotTheme.smartScan.accentColor)
                         }
 
                         HStack(spacing: 12) {
-                            PrimaryButton(title: "Refresh Status", systemImage: "arrow.clockwise", isEnabled: !runner.isRunning) {
+                            PrimaryButton(title: "Refresh Status", systemImage: "arrow.clockwise", isEnabled: !runner.isRunning, theme: .smartScan) {
                                 runStatus(moPath: moPath)
                             }
 

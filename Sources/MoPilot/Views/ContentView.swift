@@ -12,7 +12,7 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationSplitViewStyle(.balanced)
-        .background(MoPilotBackground().ignoresSafeArea())
+        .background(MoPilotBackground(theme: selectedSection.theme).ignoresSafeArea())
         .task {
             await appState.refresh()
         }

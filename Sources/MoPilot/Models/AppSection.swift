@@ -90,4 +90,59 @@ enum AppSection: String, CaseIterable, Identifiable {
             "gearshape"
         }
     }
+
+    var theme: MoPilotTheme {
+        switch self {
+        case .dashboard:
+            .smartScan
+        case .clean:
+            .cleanup
+        case .analyze:
+            .files
+        case .uninstall:
+            .applications
+        case .optimize:
+            .protection
+        case .status:
+            .smartScan
+        case .settings:
+            .settings
+        }
+    }
+
+    var sidebarGroup: SidebarGroup {
+        switch self {
+        case .dashboard:
+            .main
+        case .clean:
+            .cleanup
+        case .analyze:
+            .files
+        case .uninstall:
+            .applications
+        case .optimize:
+            .protection
+        case .status:
+            .main
+        case .settings:
+            .system
+        }
+    }
+}
+
+enum SidebarGroup: String, CaseIterable, Identifiable {
+    case main = ""
+    case cleanup = "清理"
+    case files = "文件"
+    case applications = "应用"
+    case protection = "防护"
+    case system = "系统"
+
+    var id: String { rawValue }
+
+    var title: String { rawValue }
+
+    var sections: [AppSection] {
+        AppSection.sidebarSections.filter { $0.sidebarGroup == self }
+    }
 }

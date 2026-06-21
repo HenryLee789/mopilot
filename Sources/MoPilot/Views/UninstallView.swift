@@ -21,6 +21,7 @@ struct UninstallView: View {
             title: "Uninstaller",
             subtitle: "在图形界面中选择应用，先 dry-run 预览，再确认后台调用 mo uninstall 完成卸载。默认移入废纸篓，不使用永久删除。",
             systemImage: "app.badge",
+            theme: .applications,
             runner: runner
         ) {
             VStack(alignment: .leading, spacing: 14) {
@@ -101,11 +102,11 @@ struct UninstallView: View {
                 }
 
                 HStack(spacing: 12) {
-                    PrimaryButton(title: "Preview Selection", systemImage: "doc.text.magnifyingglass", isEnabled: !selectedNames.isEmpty && !runner.isRunning) {
+                    PrimaryButton(title: "Preview Selection", systemImage: "doc.text.magnifyingglass", isEnabled: !selectedNames.isEmpty && !runner.isRunning, theme: .applications) {
                         runPreview(moPath: moPath)
                     }
 
-                    PrimaryButton(title: "Uninstall", systemImage: "trash", role: .destructive, isEnabled: canUninstallSelected && !runner.isRunning) {
+                    PrimaryButton(title: "Uninstall", systemImage: "trash", role: .destructive, isEnabled: canUninstallSelected && !runner.isRunning, theme: .applications) {
                         showUninstallConfirmation = true
                     }
 

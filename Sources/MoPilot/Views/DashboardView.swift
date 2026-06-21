@@ -9,7 +9,7 @@ struct DashboardView: View {
     @State private var showCleanConfirmation = false
 
     var body: some View {
-        MoPilotPage(maxWidth: 1180) {
+        MoPilotPage(theme: .smartScan, maxWidth: 1180) {
             dashboardHeader
             scanStatusCard
             macStatusGrid
@@ -53,41 +53,44 @@ struct DashboardView: View {
     }
 
     private var scanStatusCard: some View {
-        ModernCard(cornerRadius: 24, padding: 26, accent: MoPilotPalette.blue, showsAccentLine: true) {
-            HStack(alignment: .center, spacing: 30) {
-                VStack(alignment: .leading, spacing: 18) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(scanEyebrow)
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
+        ModernCard(cornerRadius: 34, padding: 30, accent: MoPilotTheme.smartScan.accentColor, showsAccentLine: true) {
+            HStack(alignment: .center, spacing: 34) {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text(scanEyebrow)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.primary.opacity(0.55))
+                        .textCase(.uppercase)
+
+                    VStack(alignment: .leading, spacing: 9) {
                         Text(scanHeadline)
-                            .font(.system(size: 38, weight: .bold))
+                            .font(.system(size: 40, weight: .bold, design: .rounded))
                             .lineLimit(2)
-                            .minimumScaleFactor(0.62)
+                            .minimumScaleFactor(0.58)
                         Text(scanSubtitle)
                             .font(.callout)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.primary.opacity(0.66))
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    if scanRunner.isRunning {
-                        ProgressCard(
-                            title: "Scanning with Mole CLI",
-                            detail: "后台执行中，UI 不会被阻塞。",
-                            progress: scanProgress,
-                            isActive: true,
-                            accent: MoPilotPalette.blue
-                        )
+                    HStack(spacing: 14) {
+                        ResultPill(icon: "sparkles", label: "Cleanup", value: systemJunkEstimate, theme: .cleanup)
+                        ResultPill(icon: "folder", label: "Files", value: "Analyze", theme: .files)
+                        ResultPill(icon: "hand.raised.fill", label: "Privacy", value: "Dry-run", theme: .protection)
                     }
 
                     HStack(spacing: 12) {
-                        primaryScanAction
+                        if scanRunner.hasSuccessfulRun(.cleanDryRun), !scanRunner.hasSuccessfulRun(.clean), !scanRunner.isRunning {
+                            PrimaryButton(title: "Clean Now", systemImage: "trash", role: .destructive, theme: .cleanup) {
+                                showCleanConfirmation = true
+                            }
+                        }
 
                         Button {
                             selection = .status
                         } label: {
                             Label("System Status", systemImage: "waveform.path.ecg")
                         }
+                        .buttonStyle(.bordered)
                         .disabled(!appState.cliStatus.isInstalled || scanRunner.isRunning)
 
                         if scanRunner.isRunning {
@@ -97,32 +100,38 @@ struct DashboardView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                DashboardGauge(
-                    progress: gaugeProgress,
-                    title: gaugeTitle,
-                    subtitle: gaugeSubtitle,
-                    systemImage: scanGaugeIcon,
-                    accent: scanAccent
-                )
-                .frame(width: 230, height: 230)
+                scanControl
+                    .frame(width: 180, height: 180)
             }
         }
     }
 
     @ViewBuilder
-    private var primaryScanAction: some View {
+    private var scanControl: some View {
         if !appState.cliStatus.isInstalled {
-            PrimaryButton(title: "重新检测", systemImage: "arrow.clockwise") {
+            Button {
                 Task { await appState.refresh() }
+            } label: {
+                VStack(spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 30, weight: .light))
+                    Text("Retry")
+                    Text("brew install mole")
+                        .font(.system(size: 10))
+                        .opacity(0.72)
+                }
             }
+            .buttonStyle(MoPilotSuperEllipseButtonStyle(gradient: MoPilotTheme.settings.buttonGradient, size: CGSize(width: 160, height: 160)))
         } else if scanRunner.isRunning {
-            PrimaryButton(title: "Scanning", systemImage: "hourglass", isEnabled: false) {}
+            ScanProgressRing(progress: scanProgress, phase: "Scanning", detail: "mo clean --dry-run", theme: .smartScan)
         } else if scanRunner.hasSuccessfulRun(.cleanDryRun), !scanRunner.hasSuccessfulRun(.clean) {
-            PrimaryButton(title: "Clean Now", systemImage: "trash", role: .destructive) {
-                showCleanConfirmation = true
+            ScanButton(title: "Rescan", subtitle: "dry-run", theme: .smartScan) {
+                if let moPath = appState.cliStatus.path {
+                    startScan(moPath: moPath)
+                }
             }
         } else {
-            PrimaryButton(title: "Start Scan", systemImage: "magnifyingglass") {
+            ScanButton(title: "Scan", subtitle: "Safe preview", theme: .smartScan) {
                 if let moPath = appState.cliStatus.path {
                     startScan(moPath: moPath)
                 }
@@ -132,9 +141,9 @@ struct DashboardView: View {
 
     private var macStatusGrid: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 205), spacing: 14)], spacing: 14) {
-            StatusCard(title: "macOS", value: appState.systemInfo.macOSVersion, subtitle: "当前系统版本", systemImage: "macwindow", accent: MoPilotPalette.blue)
-            StatusCard(title: "Chip", value: appState.systemInfo.architecture, subtitle: "设备架构", systemImage: "cpu", accent: MoPilotPalette.violet)
-            StatusCard(title: "Free Space", value: appState.systemInfo.freeDiskSpace, subtitle: "总容量 \(appState.systemInfo.totalDiskSpace)", systemImage: "internaldrive", accent: MoPilotPalette.mint, progress: diskFreeRatio)
+            StatusCard(title: "macOS", value: appState.systemInfo.macOSVersion, subtitle: "当前系统版本", systemImage: "macwindow", accent: MoPilotTheme.smartScan.accentColor)
+            StatusCard(title: "Chip", value: appState.systemInfo.architecture, subtitle: "设备架构", systemImage: "cpu", accent: MoPilotTheme.applications.accentColor)
+            StatusCard(title: "Free Space", value: appState.systemInfo.freeDiskSpace, subtitle: "总容量 \(appState.systemInfo.totalDiskSpace)", systemImage: "internaldrive", accent: MoPilotTheme.cleanup.accentColor, progress: diskFreeRatio)
             StatusCard(title: "Safety", value: "Dry-run first", subtitle: "危险操作执行前必须确认", systemImage: "lock.shield", accent: MoPilotPalette.amber)
         }
     }
@@ -151,7 +160,7 @@ struct DashboardView: View {
                     estimate: systemJunkEstimate,
                     status: scanRunner.hasSuccessfulRun(.cleanDryRun) ? "Previewed" : "Ready",
                     systemImage: "sparkles",
-                    accent: MoPilotPalette.blue,
+                    accent: MoPilotTheme.cleanup.accentColor,
                     isEnabled: appState.cliStatus.isInstalled
                 ) {
                     selection = .clean
@@ -163,7 +172,7 @@ struct DashboardView: View {
                     estimate: cacheEstimate,
                     status: "Protected",
                     systemImage: "tray.full",
-                    accent: MoPilotPalette.mint,
+                    accent: MoPilotTheme.cleanup.accentColor,
                     isEnabled: appState.cliStatus.isInstalled
                 ) {
                     selection = .clean
@@ -175,7 +184,7 @@ struct DashboardView: View {
                     estimate: "Run Analyze",
                     status: appState.capabilities.analyzeJSONFlag ?? "Raw Log",
                     systemImage: "folder",
-                    accent: MoPilotPalette.teal,
+                    accent: MoPilotTheme.files.accentColor,
                     isEnabled: appState.cliStatus.isInstalled
                 ) {
                     selection = .analyze
@@ -187,7 +196,7 @@ struct DashboardView: View {
                     estimate: "Dry-run",
                     status: "Confirm",
                     systemImage: "hand.raised",
-                    accent: MoPilotPalette.violet,
+                    accent: MoPilotTheme.protection.accentColor,
                     isEnabled: appState.cliStatus.isInstalled
                 ) {
                     selection = .optimize

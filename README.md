@@ -22,6 +22,7 @@ MoPilot 是一个 macOS 图形界面工具，只调用本机已安装的 Mole CL
 - Uninstall 读取 `mo uninstall --list`，在 GUI 中选择应用，dry-run 预览后后台卸载
 - 命令 stdout / stderr 实时显示，可取消、可复制、可保存日志
 - 日志默认保存到 `~/Library/Logs/MoPilot/`
+- UI 层复用/改编了 Mac Sai 的 SwiftUI 组件结构与视觉模式；不使用其名称、图标、品牌资产或清理引擎
 
 ## Install Mole CLI
 
@@ -104,6 +105,8 @@ It supports both `--json` and `-json`. If neither flag is available, or if JSON 
 ## License
 
 MoPilot is released under GPL-3.0. See [LICENSE](LICENSE).
+
+Parts of the SwiftUI UI layer are adapted from Mac Sai under the BSD 3-Clause License. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Mole CLI is a separate project. Review the Mole project for its own license, trademark policy, and safety guidance:
 

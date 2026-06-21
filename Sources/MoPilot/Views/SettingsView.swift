@@ -5,7 +5,7 @@ struct SettingsView: View {
     @State private var logMessage = ""
 
     var body: some View {
-        MoPilotPage(maxWidth: 920) {
+        MoPilotPage(theme: .settings, maxWidth: 920) {
             PageHeader(
                 title: "Settings 设置",
                 subtitle: "配置本机 mo 命令路径、日志目录和安全保护状态。",
@@ -76,7 +76,7 @@ struct SettingsView: View {
         let cliVersion = appState.cliStatus.version ?? "unknown"
         return """
         MoPilot Diagnostics
-        App Version: 0.5.0
+        App Version: 0.6.0
         Mole CLI Path: \(cliPath)
         Mole CLI Version: \(cliVersion)
         Analyze Mode: \(appState.capabilities.analyzeModeDescription)

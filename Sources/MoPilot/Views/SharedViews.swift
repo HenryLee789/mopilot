@@ -44,12 +44,13 @@ enum MoPilotPalette {
 }
 
 struct MoPilotPage<Content: View>: View {
+    var theme: MoPilotTheme = .smartScan
     var maxWidth: CGFloat = 1120
     @ViewBuilder let content: Content
 
     var body: some View {
         ZStack {
-            MoPilotBackground()
+            MoPilotBackground(theme: theme)
                 .ignoresSafeArea()
 
             ScrollView {
@@ -65,21 +66,14 @@ struct MoPilotPage<Content: View>: View {
 }
 
 struct MoPilotBackground: View {
+    var theme: MoPilotTheme = .smartScan
+
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [
-                    Color(nsColor: .windowBackgroundColor),
-                    MoPilotPalette.blue.opacity(0.055),
-                    MoPilotPalette.violet.opacity(0.045),
-                    MoPilotPalette.mint.opacity(0.030)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            ThemedBackground(theme: theme)
 
             ScanLineField()
-                .opacity(0.10)
+                .opacity(0.08)
         }
     }
 }
@@ -386,11 +380,12 @@ struct CommandPageLayout<Controls: View>: View {
     let title: String
     let subtitle: String
     var systemImage: String = "sparkles"
+    var theme: MoPilotTheme = .smartScan
     @ObservedObject var runner: CommandRunner
     @ViewBuilder let controls: Controls
 
     var body: some View {
-        MoPilotPage(maxWidth: 1140) {
+        MoPilotPage(theme: theme, maxWidth: 1140) {
             PageHeader(title: title, subtitle: subtitle, systemImage: systemImage)
             controls
             CommandStatusStrip(runner: runner)
