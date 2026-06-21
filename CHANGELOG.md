@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.6.2
+
+- Replaced the MoPilot app icon with the new blue-purple cleanup monitor artwork.
+- Added `AppIcon.png` for in-app branding and updated the sidebar brand mark to use the real app icon.
+- Updated app bundle resource copying so packaged builds include all files under `Sources/MoPilot/Resources`.
+- Updated app bundle metadata to version `0.6.2`.
+
 ## v0.6.1
 
 - Added visible hover feedback for sidebar rows, collapsible section headers, Settings footer, primary scan controls, secondary action buttons, feature cards, result pills, and Uninstaller app rows.

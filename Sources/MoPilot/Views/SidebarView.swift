@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct SidebarView: View {
@@ -41,11 +42,7 @@ struct SidebarView: View {
     private var brandHeader: some View {
         HStack(spacing: 10) {
             ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(MoPilotPalette.smartGradient)
-                Image(systemName: "sparkles")
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(.white)
+                AppIconThumbnail()
             }
             .frame(width: 36, height: 36)
             .shadow(color: MoPilotPalette.blue.opacity(0.18), radius: 8, y: 5)
@@ -99,7 +96,7 @@ struct SidebarView: View {
                 Text("Settings")
                     .font(.system(size: 13, weight: .medium))
                 Spacer()
-                Text("v0.6.1")
+                Text("v0.6.2")
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(.tertiary)
             }
@@ -191,5 +188,39 @@ private struct SidebarSectionHeader: View {
         .onHover { isHovered = $0 }
         .animation(.easeOut(duration: 0.14), value: isHovered)
         .padding(.top, 6)
+    }
+}
+
+private struct AppIconThumbnail: View {
+    var body: some View {
+        Group {
+            if let image = Self.image {
+                Image(nsImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(MoPilotPalette.smartGradient)
+                    Image(systemName: "sparkles")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(.white)
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private static var image: NSImage? {
+        if let namedImage = NSImage(named: "AppIcon") {
+            return namedImage
+        }
+        if let pngURL = Bundle.main.url(forResource: "AppIcon", withExtension: "png") {
+            return NSImage(contentsOf: pngURL)
+        }
+        if let icnsURL = Bundle.main.url(forResource: "AppIcon", withExtension: "icns") {
+            return NSImage(contentsOf: icnsURL)
+        }
+        return nil
     }
 }

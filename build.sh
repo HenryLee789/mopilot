@@ -9,7 +9,7 @@ fi
 APP_DISPLAY_NAME="MoPilot"
 EXECUTABLE_NAME="MoPilot"
 BUNDLE_ID="io.github.mopilot.app"
-APP_VERSION="0.6.1"
+APP_VERSION="0.6.2"
 MIN_SYSTEM_VERSION="13.0"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,7 +20,7 @@ APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$EXECUTABLE_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
-SOURCE_ICON="$ROOT_DIR/Sources/MoPilot/Resources/AppIcon.icns"
+SOURCE_RESOURCES="$ROOT_DIR/Sources/MoPilot/Resources"
 
 SWIFT_BIN="${SWIFT_BIN:-/usr/bin/swift}"
 SWIFTC_BIN="${SWIFTC_BIN:-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc}"
@@ -65,8 +65,8 @@ mkdir -p "$APP_MACOS" "$APP_RESOURCES"
 cp "$BUILD_BINARY" "$APP_BINARY"
 chmod +x "$APP_BINARY"
 
-if [[ -f "$SOURCE_ICON" ]]; then
-  cp "$SOURCE_ICON" "$APP_RESOURCES/AppIcon.icns"
+if [[ -d "$SOURCE_RESOURCES" ]]; then
+  cp -R "$SOURCE_RESOURCES/." "$APP_RESOURCES/"
 fi
 
 cat >"$INFO_PLIST" <<PLIST
