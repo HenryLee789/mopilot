@@ -14,9 +14,9 @@ struct SystemInfoService {
 
     private static var architecture: String {
         #if arch(arm64)
-        return "Apple Silicon (arm64)"
+        return "Apple 芯片 (arm64)"
         #elseif arch(x86_64)
-        return "Intel (x86_64)"
+        return "Intel 芯片 (x86_64)"
         #else
         return "未知架构"
         #endif

@@ -12,7 +12,7 @@ struct StatusView: View {
 
     var body: some View {
         CommandPageLayout(
-            title: "System Status",
+            title: "系统状态",
             subtitle: "优先使用 JSON 输出构建状态卡片；当前 CLI 不支持或解析失败时自动回退原始日志。",
             systemImage: "waveform.path.ecg",
             theme: .smartScan,
@@ -24,22 +24,22 @@ struct StatusView: View {
                         HStack(alignment: .top, spacing: 16) {
                             IconBadge(systemImage: "waveform.path.ecg", accent: MoPilotTheme.smartScan.accentColor)
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("Live system snapshot")
+                                Text("实时系统概览")
                                     .font(.system(size: 26, weight: .bold))
                                 Text(appState.capabilities.statusModeDescription)
                                     .font(.callout)
                                     .foregroundStyle(.secondary)
                             }
                             Spacer()
-                            StatusTag(title: parsedStatus?.metrics.isEmpty == false ? "Cards" : "Raw Log", accent: MoPilotTheme.smartScan.accentColor)
+                            StatusTag(title: parsedStatus?.metrics.isEmpty == false ? "卡片视图" : "原始日志", accent: MoPilotTheme.smartScan.accentColor)
                         }
 
                         if runner.isRunning {
-                            ProgressCard(title: "Refreshing status", detail: "后台调用 mo status。", progress: 0.62, isActive: true, accent: MoPilotTheme.smartScan.accentColor)
+                            ProgressCard(title: "正在刷新状态", detail: "后台调用 mo status。", progress: 0.62, isActive: true, accent: MoPilotTheme.smartScan.accentColor)
                         }
 
                         HStack(spacing: 12) {
-                            PrimaryButton(title: "Refresh Status", systemImage: "arrow.clockwise", isEnabled: !runner.isRunning, theme: .smartScan) {
+                            PrimaryButton(title: "刷新状态", systemImage: "arrow.clockwise", isEnabled: !runner.isRunning, theme: .smartScan) {
                                 runStatus(moPath: moPath)
                             }
 

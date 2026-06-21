@@ -33,7 +33,7 @@ enum MoleJSONParsers {
             StatusMetric(
                 title: "CPU",
                 value: ByteFormatting.percent(report.cpu?.usage),
-                detail: "Load \(formatLoad(report.cpu?.load1)) / \(formatLoad(report.cpu?.load5)) / \(formatLoad(report.cpu?.load15))",
+                detail: "负载 \(formatLoad(report.cpu?.load1)) / \(formatLoad(report.cpu?.load5)) / \(formatLoad(report.cpu?.load15))",
                 systemImage: "cpu"
             ),
             StatusMetric(

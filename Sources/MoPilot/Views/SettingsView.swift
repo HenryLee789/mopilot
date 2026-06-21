@@ -7,7 +7,7 @@ struct SettingsView: View {
     var body: some View {
         MoPilotPage(theme: .settings, maxWidth: 920) {
             PageHeader(
-                title: "Settings 设置",
+                title: "设置",
                 subtitle: "配置本机 mo 命令路径、日志目录和安全保护状态。",
                 systemImage: "gearshape"
             )
@@ -52,12 +52,12 @@ struct SettingsView: View {
             }
 
             ProductCard(title: "安全保护", systemImage: "lock.shield") {
-                Toggle("启用 dry-run 保护", isOn: .constant(true))
+                Toggle("启用安全预览保护", isOn: .constant(true))
                     .disabled(true)
                 Text("危险操作必须先预览，并在执行前弹出确认。该保护当前不允许关闭。")
                     .foregroundStyle(.secondary)
-                InfoRow(label: "Analyze", value: appState.capabilities.analyzeModeDescription)
-                InfoRow(label: "Status", value: appState.capabilities.statusModeDescription)
+                InfoRow(label: "磁盘分析", value: appState.capabilities.analyzeModeDescription)
+                InfoRow(label: "系统状态", value: appState.capabilities.statusModeDescription)
             }
 
             ProductCard(title: "日志", systemImage: "doc.text") {
@@ -100,18 +100,18 @@ struct SettingsView: View {
     }
 
     private var diagnosticsText: String {
-        let cliPath = appState.cliStatus.path ?? "not detected"
-        let cliVersion = appState.cliStatus.version ?? "unknown"
+        let cliPath = appState.cliStatus.path ?? "未检测到"
+        let cliVersion = appState.cliStatus.version ?? "未知"
         return """
-        MoPilot Diagnostics
-        App Version: 0.6.2
-        Mole CLI Path: \(cliPath)
-        Mole CLI Version: \(cliVersion)
-        Analyze Mode: \(appState.capabilities.analyzeModeDescription)
-        Status Mode: \(appState.capabilities.statusModeDescription)
+        MoPilot 诊断信息
+        应用版本：0.6.3
+        Mole CLI 路径：\(cliPath)
+        Mole CLI 版本：\(cliVersion)
+        磁盘分析模式：\(appState.capabilities.analyzeModeDescription)
+        系统状态模式：\(appState.capabilities.statusModeDescription)
         macOS: \(appState.systemInfo.macOSVersion)
-        Architecture: \(appState.systemInfo.architecture)
-        Log Directory: \(appState.logService.directoryURL.path)
+        设备架构：\(appState.systemInfo.architecture)
+        日志目录：\(appState.logService.directoryURL.path)
         """
     }
 }

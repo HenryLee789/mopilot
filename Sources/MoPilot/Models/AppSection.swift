@@ -18,38 +18,38 @@ enum AppSection: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .dashboard:
-            "Dashboard"
+            "总览"
         case .clean:
-            "System Junk"
+            "系统垃圾"
         case .analyze:
-            "Large Files"
+            "大文件"
         case .uninstall:
-            "Uninstaller"
+            "卸载器"
         case .optimize:
-            "Privacy"
+            "隐私保护"
         case .status:
-            "System Status"
+            "系统状态"
         case .settings:
-            "Settings"
+            "设置"
         }
     }
 
     var shortTitle: String {
         switch self {
         case .dashboard:
-            "Dashboard"
+            "总览"
         case .clean:
-            "System Junk"
+            "系统垃圾"
         case .analyze:
-            "Large Files"
+            "大文件"
         case .uninstall:
-            "Uninstaller"
+            "卸载器"
         case .optimize:
-            "Privacy"
+            "隐私保护"
         case .status:
-            "Status"
+            "状态"
         case .settings:
-            "Settings"
+            "设置"
         }
     }
 

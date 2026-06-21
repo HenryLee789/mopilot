@@ -131,7 +131,7 @@ struct PageHeader: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
 
-                    Text("Live")
+                    Text("实时")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(MoPilotPalette.mint)
                         .padding(.horizontal, 8)
@@ -432,7 +432,7 @@ struct CommandStatusStrip: View {
             return "正在后台调用本机 mo CLI，输出会实时写入日志。"
         }
         if runner.logText.isEmpty {
-            return "等待执行。危险操作会先 dry-run 预览。"
+            return "等待执行。危险操作会先做安全预览。"
         }
         return "最近一次命令已结束，日志已保存或可复制。"
     }

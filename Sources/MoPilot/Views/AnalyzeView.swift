@@ -15,7 +15,7 @@ struct AnalyzeView: View {
 
     var body: some View {
         CommandPageLayout(
-            title: "Large Files",
+            title: "大文件",
             subtitle: "调用 mo analyze 分析空间占用。支持 JSON 时展示表格，否则自动回退原始日志。",
             systemImage: "folder",
             theme: .files,
@@ -27,22 +27,22 @@ struct AnalyzeView: View {
                         HStack(alignment: .top, spacing: 16) {
                             IconBadge(systemImage: "folder", accent: MoPilotTheme.files.accentColor)
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("Find space-heavy folders")
+                                Text("查找占用空间较大的项目")
                                     .font(.system(size: 26, weight: .bold))
                                 Text(appState.capabilities.analyzeModeDescription)
                                     .font(.callout)
                                     .foregroundStyle(.secondary)
                             }
                             Spacer()
-                            StatusTag(title: parsedItems.isEmpty ? "Raw Log" : "\(parsedItems.count) Items", accent: MoPilotTheme.files.accentColor)
+                            StatusTag(title: parsedItems.isEmpty ? "原始日志" : "\(parsedItems.count) 项", accent: MoPilotTheme.files.accentColor)
                         }
 
                         if runner.isRunning {
-                            ProgressCard(title: "Analyzing disk usage", detail: "mo analyze 正在后台执行。", progress: 0.58, isActive: true, accent: MoPilotTheme.files.accentColor)
+                            ProgressCard(title: "正在分析磁盘占用", detail: "mo analyze 正在后台执行。", progress: 0.58, isActive: true, accent: MoPilotTheme.files.accentColor)
                         }
 
                         HStack(spacing: 12) {
-                            PrimaryButton(title: "Run Analyze", systemImage: "chart.pie", isEnabled: !runner.isRunning, theme: .files) {
+                            PrimaryButton(title: "开始分析", systemImage: "chart.pie", isEnabled: !runner.isRunning, theme: .files) {
                                 runAnalyze(moPath: moPath)
                             }
 

@@ -18,8 +18,8 @@ struct UninstallView: View {
 
     var body: some View {
         CommandPageLayout(
-            title: "Uninstaller",
-            subtitle: "在图形界面中选择应用，先 dry-run 预览，再确认后台调用 mo uninstall 完成卸载。默认移入废纸篓，不使用永久删除。",
+            title: "应用卸载",
+            subtitle: "在图形界面中选择应用，先做安全预览，再确认后台调用 mo uninstall 完成卸载。默认移入废纸篓，不使用永久删除。",
             systemImage: "app.badge",
             theme: .applications,
             runner: runner
@@ -74,13 +74,13 @@ struct UninstallView: View {
                 }
             }
         } message: {
-            Text("即将后台执行 mo uninstall \(selectedNamesForCommand.joined(separator: " "))。MoPilot 会在你确认后向 mo 发送确认输入。请确认你已经查看 dry-run 预览。")
+            Text("即将后台执行 mo uninstall \(selectedNamesForCommand.joined(separator: " "))。MoPilot 会在你确认后向 mo 发送确认输入。请确认你已经查看安全预览。")
         }
     }
 
     private var safetyNotes: some View {
         ProductCard(title: "安全流程", systemImage: "lock.shield") {
-            Label("卸载前必须先选择应用并执行 dry-run 预览。", systemImage: "doc.text.magnifyingglass")
+            Label("卸载前必须先选择应用并执行安全预览。", systemImage: "doc.text.magnifyingglass")
             Label("点击卸载后 MoPilot 后台运行 mo uninstall，不再打开 Terminal.app。", systemImage: "desktopcomputer")
             Label("默认移动到 macOS 废纸篓，不使用 --permanent。", systemImage: "trash")
         }
@@ -90,7 +90,7 @@ struct UninstallView: View {
         ProductCard(title: "卸载控制台", systemImage: "app.badge") {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    TextField("搜索应用、Bundle ID 或路径", text: $searchText)
+                    TextField("搜索应用、包标识符或路径", text: $searchText)
                         .textFieldStyle(.roundedBorder)
 
                     SecondaryHoverButton(
@@ -104,11 +104,11 @@ struct UninstallView: View {
                 }
 
                 HStack(spacing: 12) {
-                    PrimaryButton(title: "Preview Selection", systemImage: "doc.text.magnifyingglass", isEnabled: !selectedNames.isEmpty && !runner.isRunning, theme: .applications) {
+                    PrimaryButton(title: "预览选中项", systemImage: "doc.text.magnifyingglass", isEnabled: !selectedNames.isEmpty && !runner.isRunning, theme: .applications) {
                         runPreview(moPath: moPath)
                     }
 
-                    PrimaryButton(title: "Uninstall", systemImage: "trash", role: .destructive, isEnabled: canUninstallSelected && !runner.isRunning, theme: .applications) {
+                    PrimaryButton(title: "执行卸载", systemImage: "trash", role: .destructive, isEnabled: canUninstallSelected && !runner.isRunning, theme: .applications) {
                         showUninstallConfirmation = true
                     }
 
@@ -165,7 +165,7 @@ struct UninstallView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("已选择 \(selectedApps.count) 个应用，传给 mo 的卸载名：\(selectedNamesForCommand.joined(separator: ", "))")
                         .textSelection(.enabled)
-                    Text(canUninstallSelected ? "dry-run 已完成，可以执行卸载。" : "请先预览当前选中项。")
+                    Text(canUninstallSelected ? "安全预览已完成，可以执行卸载。" : "请先预览当前选中项。")
                         .foregroundStyle(canUninstallSelected ? .green : .secondary)
                 }
             }

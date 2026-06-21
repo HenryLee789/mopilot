@@ -9,7 +9,7 @@ fi
 APP_DISPLAY_NAME="MoPilot"
 EXECUTABLE_NAME="MoPilot"
 BUNDLE_ID="io.github.mopilot.app"
-APP_VERSION="0.6.2"
+APP_VERSION="0.6.3"
 MIN_SYSTEM_VERSION="13.0"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -82,6 +82,12 @@ cat >"$INFO_PLIST" <<PLIST
   <string>$APP_DISPLAY_NAME</string>
   <key>CFBundleDisplayName</key>
   <string>$APP_DISPLAY_NAME</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>zh-Hans</string>
+  <key>CFBundleLocalizations</key>
+  <array>
+    <string>zh-Hans</string>
+  </array>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleIconFile</key>

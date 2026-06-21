@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.6.3
+
+- Replaced the MoPilot icon artwork with the newly provided blue-purple cleanup monitor image.
+- Converted the source image's edge-connected black background into transparency for cleaner Finder and Dock rendering.
+- Added transparent padding around the icon artwork so the Dock size matches neighboring macOS app icons more closely.
+- Regenerated `AppIcon.icns` and `AppIcon.png`.
+- Localized the visible app interface further into Chinese, including sidebar items, dashboard actions, module cards, command pages, settings diagnostics, and saved log labels.
+- Localized the default macOS menu titles and common menu commands into Chinese at launch.
+- Updated app bundle metadata to version `0.6.3`.
+
 ## v0.6.2
 
 - Replaced the MoPilot app icon with the new blue-purple cleanup monitor artwork.

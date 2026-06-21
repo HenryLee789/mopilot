@@ -30,19 +30,19 @@ struct LogService {
         let fileURL = directoryURL.appendingPathComponent(fileName)
 
         let content = """
-        MoPilot Command Log
-        ===================
-        Started At: \(DateFormatter.logDisplayTimestamp.string(from: result.startedAt))
-        Ended At: \(DateFormatter.logDisplayTimestamp.string(from: result.endedAt))
-        Command: \(result.commandLine)
-        Exit Code: \(result.exitCode.map(String.init) ?? "N/A")
-        Cancelled: \(result.wasCancelled ? "true" : "false")
+        MoPilot 命令日志
+        =================
+        开始时间：\(DateFormatter.logDisplayTimestamp.string(from: result.startedAt))
+        结束时间：\(DateFormatter.logDisplayTimestamp.string(from: result.endedAt))
+        执行命令：\(result.commandLine)
+        退出码：\(result.exitCode.map(String.init) ?? "无")
+        是否取消：\(result.wasCancelled ? "是" : "否")
 
-        STDOUT
+        标准输出
         ------
         \(result.stdout)
 
-        STDERR
+        错误输出
         ------
         \(result.stderr)
         """

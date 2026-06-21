@@ -21,7 +21,7 @@ struct DashboardView: View {
         }
         .alert("确认执行清理", isPresented: $showCleanConfirmation) {
             Button("取消", role: .cancel) {}
-            Button("Clean Now", role: .destructive) {
+            Button("立即清理", role: .destructive) {
                 if let moPath = appState.cliStatus.path {
                     scanRunner.run(.clean, moPath: moPath)
                 }
@@ -47,7 +47,7 @@ struct DashboardView: View {
             Spacer()
 
             StatusTag(
-                title: appState.cliStatus.isInstalled ? "Mole CLI Connected" : "Install mo first",
+                title: appState.cliStatus.isInstalled ? "Mole CLI 已连接" : "请先安装 mo",
                 accent: appState.cliStatus.isInstalled ? MoPilotPalette.mint : MoPilotPalette.amber
             )
         }
@@ -74,20 +74,20 @@ struct DashboardView: View {
                     }
 
                     HStack(spacing: 14) {
-                        ResultPill(icon: "sparkles", label: "Cleanup", value: systemJunkEstimate, theme: .cleanup)
-                        ResultPill(icon: "folder", label: "Files", value: "Analyze", theme: .files)
-                        ResultPill(icon: "hand.raised.fill", label: "Privacy", value: "Dry-run", theme: .protection)
+                        ResultPill(icon: "sparkles", label: "清理", value: systemJunkEstimate, theme: .cleanup)
+                        ResultPill(icon: "folder", label: "文件", value: "分析", theme: .files)
+                        ResultPill(icon: "hand.raised.fill", label: "隐私", value: "预览", theme: .protection)
                     }
 
                     HStack(spacing: 12) {
                         if scanRunner.hasSuccessfulRun(.cleanDryRun), !scanRunner.hasSuccessfulRun(.clean), !scanRunner.isRunning {
-                            PrimaryButton(title: "Clean Now", systemImage: "trash", role: .destructive, theme: .cleanup) {
+                            PrimaryButton(title: "立即清理", systemImage: "trash", role: .destructive, theme: .cleanup) {
                                 showCleanConfirmation = true
                             }
                         }
 
                         SecondaryHoverButton(
-                            title: "System Status",
+                            title: "查看系统状态",
                             systemImage: "waveform.path.ecg",
                             isEnabled: appState.cliStatus.isInstalled && !scanRunner.isRunning,
                             accent: MoPilotTheme.smartScan.accentColor
@@ -118,7 +118,7 @@ struct DashboardView: View {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 30, weight: .light))
                         .scaleEffect(isRetryHovered ? 1.08 : 1)
-                    Text("Retry")
+                    Text("重新检测")
                     Text("brew install mole")
                         .font(.system(size: 10))
                         .opacity(0.72)
@@ -133,15 +133,15 @@ struct DashboardView: View {
             .onHover { isRetryHovered = $0 }
             .animation(.spring(response: 0.24, dampingFraction: 0.78), value: isRetryHovered)
         } else if scanRunner.isRunning {
-            ScanProgressRing(progress: scanProgress, phase: "Scanning", detail: "mo clean --dry-run", theme: .smartScan)
+            ScanProgressRing(progress: scanProgress, phase: "正在扫描", detail: "mo clean --dry-run", theme: .smartScan)
         } else if scanRunner.hasSuccessfulRun(.cleanDryRun), !scanRunner.hasSuccessfulRun(.clean) {
-            ScanButton(title: "Rescan", subtitle: "dry-run", theme: .smartScan) {
+            ScanButton(title: "重新扫描", subtitle: "安全预览", theme: .smartScan) {
                 if let moPath = appState.cliStatus.path {
                     startScan(moPath: moPath)
                 }
             }
         } else {
-            ScanButton(title: "Scan", subtitle: "Safe preview", theme: .smartScan) {
+            ScanButton(title: "开始扫描", subtitle: "安全预览", theme: .smartScan) {
                 if let moPath = appState.cliStatus.path {
                     startScan(moPath: moPath)
                 }
@@ -152,23 +152,23 @@ struct DashboardView: View {
     private var macStatusGrid: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 205), spacing: 14)], spacing: 14) {
             StatusCard(title: "macOS", value: appState.systemInfo.macOSVersion, subtitle: "当前系统版本", systemImage: "macwindow", accent: MoPilotTheme.smartScan.accentColor)
-            StatusCard(title: "Chip", value: appState.systemInfo.architecture, subtitle: "设备架构", systemImage: "cpu", accent: MoPilotTheme.applications.accentColor)
-            StatusCard(title: "Free Space", value: appState.systemInfo.freeDiskSpace, subtitle: "总容量 \(appState.systemInfo.totalDiskSpace)", systemImage: "internaldrive", accent: MoPilotTheme.cleanup.accentColor, progress: diskFreeRatio)
-            StatusCard(title: "Safety", value: "Dry-run first", subtitle: "危险操作执行前必须确认", systemImage: "lock.shield", accent: MoPilotPalette.amber)
+            StatusCard(title: "芯片", value: appState.systemInfo.architecture, subtitle: "设备架构", systemImage: "cpu", accent: MoPilotTheme.applications.accentColor)
+            StatusCard(title: "可用空间", value: appState.systemInfo.freeDiskSpace, subtitle: "总容量 \(appState.systemInfo.totalDiskSpace)", systemImage: "internaldrive", accent: MoPilotTheme.cleanup.accentColor, progress: diskFreeRatio)
+            StatusCard(title: "安全保护", value: "先预览", subtitle: "危险操作执行前必须确认", systemImage: "lock.shield", accent: MoPilotPalette.amber)
         }
     }
 
     private var featureGrid: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Cleanup Modules")
+            Text("清理模块")
                 .font(.title3.weight(.bold))
 
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 220), spacing: 14)], spacing: 14) {
                 FeatureCard(
-                    title: "System Junk",
-                    subtitle: "系统与应用缓存，先 dry-run 预览。",
+                    title: "系统垃圾",
+                    subtitle: "系统与应用缓存，先做安全预览。",
                     estimate: systemJunkEstimate,
-                    status: scanRunner.hasSuccessfulRun(.cleanDryRun) ? "Previewed" : "Ready",
+                    status: scanRunner.hasSuccessfulRun(.cleanDryRun) ? "已预览" : "可扫描",
                     systemImage: "sparkles",
                     accent: MoPilotTheme.cleanup.accentColor,
                     isEnabled: appState.cliStatus.isInstalled
@@ -177,10 +177,10 @@ struct DashboardView: View {
                 }
 
                 FeatureCard(
-                    title: "Cache Files",
+                    title: "缓存文件",
                     subtitle: "日志与缓存结果以 mo 输出为准。",
                     estimate: cacheEstimate,
-                    status: "Protected",
+                    status: "受保护",
                     systemImage: "tray.full",
                     accent: MoPilotTheme.cleanup.accentColor,
                     isEnabled: appState.cliStatus.isInstalled
@@ -189,10 +189,10 @@ struct DashboardView: View {
                 }
 
                 FeatureCard(
-                    title: "Large Files",
+                    title: "大文件",
                     subtitle: "调用 mo analyze 分析空间占用。",
-                    estimate: "Run Analyze",
-                    status: appState.capabilities.analyzeJSONFlag ?? "Raw Log",
+                    estimate: "运行分析",
+                    status: appState.capabilities.analyzeJSONFlag != nil ? "结构化" : "原始日志",
                     systemImage: "folder",
                     accent: MoPilotTheme.files.accentColor,
                     isEnabled: appState.cliStatus.isInstalled
@@ -201,10 +201,10 @@ struct DashboardView: View {
                 }
 
                 FeatureCard(
-                    title: "Privacy Cleanup",
+                    title: "隐私保护",
                     subtitle: "通过 mo optimize 的安全预览检查。",
-                    estimate: "Dry-run",
-                    status: "Confirm",
+                    estimate: "先预览",
+                    status: "需确认",
                     systemImage: "hand.raised",
                     accent: MoPilotTheme.protection.accentColor,
                     isEnabled: appState.cliStatus.isInstalled
@@ -216,11 +216,11 @@ struct DashboardView: View {
     }
 
     private var scanEyebrow: String {
-        if !appState.cliStatus.isInstalled { return "Mole CLI Required" }
-        if scanRunner.isRunning { return "Scanning" }
-        if scanRunner.hasSuccessfulRun(.clean) { return "Cleanup Complete" }
-        if scanRunner.hasSuccessfulRun(.cleanDryRun) { return "Scan Result" }
-        return "Mac Status"
+        if !appState.cliStatus.isInstalled { return "需要 Mole CLI" }
+        if scanRunner.isRunning { return "正在扫描" }
+        if scanRunner.hasSuccessfulRun(.clean) { return "清理完成" }
+        if scanRunner.hasSuccessfulRun(.cleanDryRun) { return "扫描结果" }
+        return "Mac 状态"
     }
 
     private var scanHeadline: String {
@@ -228,29 +228,29 @@ struct DashboardView: View {
         if scanRunner.isRunning { return "正在扫描可清理项目" }
         if scanRunner.hasSuccessfulRun(.clean) { return "清理已完成" }
         if scanRunner.hasSuccessfulRun(.cleanDryRun) { return "\(systemJunkEstimate) 可清理空间" }
-        return "Ready for a Safe Scan"
+        return "准备进行安全扫描"
     }
 
     private var scanSubtitle: String {
         if !appState.cliStatus.isInstalled { return "请先安装 Mole CLI：brew install mole，然后重新检测。" }
         if scanRunner.isRunning { return "MoPilot 正在后台调用本机 mo clean --dry-run，并实时保存日志。" }
         if scanRunner.hasSuccessfulRun(.clean) { return "你可以重新扫描，或进入各模块查看详细日志。" }
-        if scanRunner.hasSuccessfulRun(.cleanDryRun) { return "已完成 dry-run 预览。执行真实清理前仍会弹出确认。" }
-        return "先进行 dry-run 预览，不会在扫描阶段删除任何文件。"
+        if scanRunner.hasSuccessfulRun(.cleanDryRun) { return "已完成安全预览。执行真实清理前仍会弹出确认。" }
+        return "先进行安全预览，不会在扫描阶段删除任何文件。"
     }
 
     private var gaugeTitle: String {
-        if scanRunner.hasSuccessfulRun(.clean) { return "Done" }
+        if scanRunner.hasSuccessfulRun(.clean) { return "完成" }
         if scanRunner.hasSuccessfulRun(.cleanDryRun) { return systemJunkEstimate }
         if scanRunner.isRunning { return "\(Int(gaugeProgress * 100))%" }
-        return "Safe"
+        return "安全"
     }
 
     private var gaugeSubtitle: String {
-        if !appState.cliStatus.isInstalled { return "CLI missing" }
-        if scanRunner.hasSuccessfulRun(.clean) { return "cleaned" }
-        if scanRunner.hasSuccessfulRun(.cleanDryRun) { return "preview" }
-        return "dry-run"
+        if !appState.cliStatus.isInstalled { return "缺少 CLI" }
+        if scanRunner.hasSuccessfulRun(.clean) { return "已清理" }
+        if scanRunner.hasSuccessfulRun(.cleanDryRun) { return "已预览" }
+        return "安全预览"
     }
 
     private var scanGaugeIcon: String {

@@ -13,21 +13,21 @@ enum MoleCommand: String, Hashable {
     var displayName: String {
         switch self {
         case .cleanDryRun:
-            "Clean Dry Run"
+            "清理预览"
         case .clean:
-            "Clean"
+            "清理"
         case .analyze:
-            "Analyze"
+            "磁盘分析"
         case .status:
-            "Status"
+            "系统状态"
         case .uninstall:
-            "Uninstall"
+            "卸载"
         case .uninstallDryRun:
-            "Uninstall Dry Run"
+            "卸载预览"
         case .optimizeDryRun:
-            "Optimize Dry Run"
+            "优化预览"
         case .optimize:
-            "Optimize"
+            "优化"
         }
     }
 

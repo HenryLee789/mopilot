@@ -50,7 +50,7 @@ struct SidebarView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("MoPilot")
                     .font(.headline.weight(.bold))
-                Text("mo GUI Wrapper")
+                Text("mo 图形界面")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -93,10 +93,10 @@ struct SidebarView: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(isSelected || isSettingsHovered ? MoPilotTheme.settings.accentColor : Color.secondary)
                     .scaleEffect(isSettingsHovered ? 1.08 : 1)
-                Text("Settings")
+                Text("设置")
                     .font(.system(size: 13, weight: .medium))
                 Spacer()
-                Text("v0.6.2")
+                Text("v0.6.3")
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(.tertiary)
             }

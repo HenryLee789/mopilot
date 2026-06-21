@@ -9,7 +9,7 @@ enum MoleUninstallService {
             }
 
             guard let data = result.stdout.data(using: .utf8) else {
-                throw UninstallServiceError.invalidOutput("mo uninstall --list did not return UTF-8 output")
+                throw UninstallServiceError.invalidOutput("mo uninstall --list 没有返回 UTF-8 输出")
             }
 
             do {
@@ -54,7 +54,7 @@ enum UninstallServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .commandFailed(let message):
-            return message.isEmpty ? "mo uninstall --list failed" : message
+            return message.isEmpty ? "mo uninstall --list 执行失败" : message
         case .invalidOutput(let message):
             return "无法解析应用列表：\(message)"
         }
